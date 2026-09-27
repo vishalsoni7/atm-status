@@ -15,11 +15,10 @@ export function AppFooter() {
         Statuses are reported by people who used the ATM and may be out of date. Not affiliated with any bank.
         No account needed.
       </p>
-      <p>
-        ATM locations ©{' '}
+      <p className="app-footer-credits">
+        ©{' '}
         <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>
-        {' · '}
-        <span className="nowrap">© {YEAR} Vishal Soni</span>
+        {' · '}© {YEAR} Vishal Soni
       </p>
     </footer>
   )

@@ -365,7 +365,11 @@ a.cell:active, button.cell:active:not(:disabled) { background: var(--cell-presse
 .app-footer-head p { display: grid; }
 .app-footer-head strong { font-size: 15px; line-height: 20px; font-weight: 600; color: var(--label); }
 .app-footer a { color: var(--tint); }
-.app-footer .nowrap { white-space: nowrap; }
+.app-footer-credits {
+  margin-top: 4px !important; text-align: center; white-space: nowrap;
+  /* Shrink slightly on the narrowest phones so it stays on one line. */
+  font-size: clamp(10px, 3.2vw, 12px);
+}
 
 /* ---------- Bottom sheet ---------- */
 
