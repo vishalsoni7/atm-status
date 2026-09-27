@@ -60,12 +60,12 @@ export function Screen({ title, largeTitle, back, revealAt = 44, onRefresh, over
           {back && (
             <button className="nav-back" onClick={() => goBack(back.to)}>
               <Icon name="chevronLeft" size={26} stroke={2.4} />
-              <span>{back.label}</span>
+              {/* Like iOS: the full label until the title takes the middle, then "Back". */}
+              <span>{scrolled ? 'Back' : back.label}</span>
             </button>
           )}
         </div>
         <h2 className="nav-title" aria-hidden={!scrolled}>{title}</h2>
-        <div className="nav-side" />
       </header>
 
       <div
