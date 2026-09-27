@@ -11,6 +11,8 @@ export interface Atm {
   lifecycle: Lifecycle
   last_status: ReportStatus | null
   last_reported_at: string | null
+  // False for ATMs a visitor added that nobody else has confirmed yet.
+  confirmed: boolean
 }
 
 export interface NearbyAtm extends Atm {

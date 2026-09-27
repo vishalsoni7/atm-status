@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { RateLimitedError, submitReport } from '../lib/api'
+import { displayBank } from '../lib/banks'
 import { STATUS } from '../lib/status'
 import type { NearbyAtm, ReportStatus } from '../lib/types'
 import { Icon, Spinner } from './Icon'
@@ -55,7 +56,7 @@ export function AtAtmPrompt({ atms, onReported }: { atms: NearbyAtm[]; onReporte
           {atms.map((a) => (
             <button key={a.id} className="here-choice" onClick={() => setChosenId(a.id)}>
               <BankBadge bank={a.bank} size={32} />
-              <span className="here-choice-name">{a.bank}</span>
+              <span className="here-choice-name">{displayBank(a.bank)}</span>
               <Icon name="chevronRight" size={14} stroke={2.6} />
             </button>
           ))}
@@ -85,11 +86,11 @@ export function AtAtmPrompt({ atms, onReported }: { atms: NearbyAtm[]; onReporte
 
   const place = atm.landmark ? `near ${atm.landmark}` : atm.address
   return (
-    <section className="here-card" aria-label={`You're at ${atm.bank}`}>
+    <section className="here-card" aria-label={`You're at ${displayBank(atm.bank)}`}>
       <div className="here-head">
         <BankBadge bank={atm.bank} size={40} />
         <div className="here-title">
-          <h3>You're at {atm.bank}</h3>
+          <h3>You're at {atm.bank === 'ATM' ? 'an ATM' : atm.bank}</h3>
           <p>{place || 'Right next to you'}</p>
         </div>
         {!done && (

@@ -1,11 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
+import { BankPicker } from '../components/BankPicker'
 import { ContactCard } from '../components/ContactCard'
 import { Icon, Spinner } from '../components/Icon'
 import { Screen } from '../components/Screen'
 import { Hud, Sheet } from '../components/Sheet'
 import { BankBadge, StatusIcon } from '../components/Status'
-import { RateLimitedError, fetchAtm, fetchHistory, submitReport } from '../lib/api'
+import {
+  AlreadyNamedError,
+  RateLimitedError,
+  confirmAtm,
+  fetchAtm,
+  fetchHistory,
+  flagMissing,
+  setAtmBank,
+  submitReport,
+} from '../lib/api'
+import { UNKNOWN_BANK, displayBank } from '../lib/banks'
 import { directionsUrl } from '../lib/location'
 import { useBack } from '../lib/nav'
 import { STATUS, toneOf } from '../lib/status'
@@ -23,6 +34,8 @@ export function Detail() {
   const [error, setError] = useState(false)
   const [hud, setHud] = useState<string | null>(null)
   const [justReported, setJustReported] = useState(false)
+  const [naming, setNaming] = useState(false)
+  const [flagging, setFlagging] = useState(false)
 
   const load = useCallback(
     () =>
@@ -48,6 +61,8 @@ export function Detail() {
   }, [hud])
 
   const closeSheet = useCallback(() => goBack(`/atm/${id}`), [goBack, id])
+  const closeNaming = useCallback(() => setNaming(false), [])
+  const closeFlagging = useCallback(() => setFlagging(false), [])
 
   if (error && !atm) {
     return (
@@ -81,7 +96,7 @@ export function Detail() {
 
   return (
     <Screen
-      title={atm.bank}
+      title={displayBank(atm.bank)}
       back={BACK}
       revealAt={120}
       onRefresh={load}
@@ -98,15 +113,48 @@ export function Detail() {
               }}
             />
           </Sheet>
+          <Sheet open={naming} title="Which bank is it?" onClose={closeNaming}>
+            <NameBankForm
+              atmId={atm.id}
+              onSaved={() => {
+                setNaming(false)
+                setHud('Bank saved')
+                load()
+              }}
+            />
+          </Sheet>
+          <Sheet open={flagging} title="Is this ATM missing?" onClose={closeFlagging}>
+            <FlagMissingForm
+              atmId={atm.id}
+              onDone={(hidden) => {
+                setFlagging(false)
+                setHud(hidden ? 'Removed. Thanks!' : 'Thanks for telling us')
+                load()
+              }}
+              onCancel={closeFlagging}
+            />
+          </Sheet>
           {hud && <Hud text={hud} />}
         </>
       }
     >
       <div className="hero">
         <BankBadge bank={atm.bank} size={76} />
-        <h1>{atm.bank}</h1>
+        <h1>{displayBank(atm.bank)}</h1>
         <p>{[atm.address, atm.landmark && `near ${atm.landmark}`].filter(Boolean).join(', ') || 'Address not added yet'}</p>
       </div>
+
+      {atm.confirmed === false && <ConfirmCard atmId={atm.id} onConfirmed={() => { setHud('Confirmed. Thanks!'); load() }} />}
+
+      {atm.bank === UNKNOWN_BANK && (
+        <button className="add-atm-row name-bank-row" onClick={() => setNaming(true)}>
+          <span className="add-atm-icon"><Icon name="question" size={18} stroke={2.6} /></span>
+          <span>
+            <strong>Which bank runs this ATM?</strong>
+            <small>If you know, tap to add it for everyone.</small>
+          </span>
+        </button>
+      )}
 
       <div className="actions">
         <a className="action" href={directionsUrl(atm.lat, atm.lng)} target="_blank" rel="noreferrer">
@@ -146,6 +194,8 @@ export function Detail() {
         </>
       )}
       <p className="group-footer">Reports are anonymous. You can report each ATM once every 10 minutes.</p>
+
+      <button className="missing-btn" onClick={() => setFlagging(true)}>This ATM isn't here</button>
     </Screen>
   )
 }
@@ -197,7 +247,7 @@ function ReportOptions({ atm, onSent }: { atm: Atm; onSent: () => void }) {
 
   return (
     <div className="sheet-body">
-      <p className="sheet-sub">{atm.bank}{atm.address ? `, ${atm.address}` : ''}</p>
+      <p className="sheet-sub">{displayBank(atm.bank)}{atm.address ? `, ${atm.address}` : ''}</p>
       <div className="group">
         {OPTIONS.map((o) => (
           <button
@@ -216,6 +266,115 @@ function ReportOptions({ atm, onSent }: { atm: Atm; onSent: () => void }) {
         ))}
       </div>
       {message && <p className="sheet-message">{message}</p>}
+    </div>
+  )
+}
+
+function NameBankForm({ atmId, onSaved }: { atmId: string; onSaved: () => void }) {
+  const [bank, setBank] = useState('')
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function save() {
+    setSending(true)
+    setError(null)
+    try {
+      await setAtmBank(atmId, bank)
+      onSaved()
+    } catch (err) {
+      setError(
+        err instanceof AlreadyNamedError
+          ? 'Someone already added the bank for this ATM. Pull down to refresh.'
+          : "Couldn't save. Check your internet connection and try again.",
+      )
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="sheet-body">
+      <p className="sheet-sub">Pick the bank shown on the ATM.</p>
+      <BankPicker value={bank} onChange={setBank} />
+      {error && <p className="sheet-message">{error}</p>}
+      <button className="primary-btn" onClick={save} disabled={sending || bank.length < 2}>
+        {sending ? <Spinner size={20} /> : 'Save bank'}
+      </button>
+    </div>
+  )
+}
+
+// Shown on ATMs a visitor added: a second person confirms they're real.
+function ConfirmCard({ atmId, onConfirmed }: { atmId: string; onConfirmed: () => void }) {
+  const [sending, setSending] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+
+  async function confirm() {
+    setSending(true)
+    setMessage(null)
+    try {
+      const result = await confirmAtm(atmId)
+      if (result === 'needs_someone_else') setMessage('Thanks! Someone else needs to confirm the ATM you added.')
+      else onConfirmed()
+    } catch {
+      setMessage("Couldn't confirm. Check your internet connection and try again.")
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <section className="confirm-card">
+      <div>
+        <h3>Not confirmed yet</h3>
+        <p>A visitor added this ATM. If you can see it here, confirm it so others can trust it.</p>
+      </div>
+      <button className="confirm-btn" onClick={confirm} disabled={sending}>
+        {sending ? <Spinner size={18} /> : <><Icon name="check" size={18} stroke={2.6} /> Yes, it's here</>}
+      </button>
+      {message && <p className="confirm-message">{message}</p>}
+    </section>
+  )
+}
+
+function FlagMissingForm({
+  atmId,
+  onDone,
+  onCancel,
+}: {
+  atmId: string
+  onDone: (hidden: boolean) => void
+  onCancel: () => void
+}) {
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function flag() {
+    setSending(true)
+    setError(null)
+    try {
+      onDone((await flagMissing(atmId)) === 'hidden')
+    } catch (err) {
+      setError(
+        err instanceof RateLimitedError
+          ? "You've reported a lot of missing ATMs today. Try again tomorrow."
+          : "Couldn't send. Check your internet connection and try again.",
+      )
+    } finally {
+      setSending(false)
+    }
+  }
+
+  return (
+    <div className="sheet-body">
+      <p className="sheet-sub">
+        Use this if the ATM has been removed, or was never at this spot. When two people say it isn't here, we hide it.
+      </p>
+      {error && <p className="sheet-message">{error}</p>}
+      <button className="primary-btn danger-btn" onClick={flag} disabled={sending}>
+        {sending ? <Spinner size={20} /> : "It isn't here"}
+      </button>
+      <button className="secondary-btn" onClick={onCancel}>Cancel</button>
     </div>
   )
 }

@@ -8,7 +8,7 @@ export function AppFooter() {
         <img src="/favicon.svg" alt="" width="32" height="32" />
         <p>
           <strong>ATM Status</strong>
-          <span>Version {__APP_VERSION__} · Pilot in Bhilwara</span>
+          <span>Version {__APP_VERSION__}</span>
         </p>
       </div>
       <p>

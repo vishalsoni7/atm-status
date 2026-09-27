@@ -1,31 +1,56 @@
 import { useEffect, useState } from 'react'
 
-// Pilot city centre, used when location is denied or unavailable.
-export const FALLBACK = { lat: 25.3463, lng: 74.6364, label: 'Bhilwara' }
+// How far around the user we look for ATMs.
+export const SEARCH_RADIUS_M = 10_000
 
 export interface Position {
   lat: number
   lng: number
-  // Metres, as reported by the device. Null for the city-centre fallback.
-  accuracy: number | null
-  approximate: boolean
+  accuracy: number // metres, as reported by the device
 }
 
-export function usePosition(): Position | null {
-  const [pos, setPos] = useState<Position | null>(() =>
-    navigator.geolocation ? null : { ...FALLBACK, accuracy: null, approximate: true },
+export type LocationState =
+  | { status: 'locating' }
+  | { status: 'found'; pos: Position }
+  | { status: 'denied' } // the person (or browser) said no
+  | { status: 'unavailable' } // no GPS fix, timeout, or no geolocation support
+
+export function usePosition(): { location: LocationState; retry: () => void } {
+  const [location, setLocation] = useState<LocationState>(() =>
+    navigator.geolocation ? { status: 'locating' } : { status: 'unavailable' },
   )
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     if (!navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(
-      (p) => setPos({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy, approximate: false }),
-      () => setPos({ ...FALLBACK, accuracy: null, approximate: true }),
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 30_000 },
+      (p) =>
+        setLocation({
+          status: 'found',
+          pos: { lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy },
+        }),
+      (err) => setLocation({ status: err.code === err.PERMISSION_DENIED ? 'denied' : 'unavailable' }),
+      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 30_000 },
     )
-  }, [])
+  }, [attempt])
 
-  return pos
+  const retry = () => {
+    setLocation({ status: 'locating' })
+    setAttempt((n) => n + 1)
+  }
+  return { location, retry }
+}
+
+// A fresh, as-precise-as-possible fix, for pinning a new ATM where the person stands.
+export function getPreciseLocation(): Promise<Position> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) return reject(new Error('unavailable'))
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy }),
+      reject,
+      { enableHighAccuracy: true, timeout: 20_000, maximumAge: 0 },
+    )
+  })
 }
 
 export function directionsUrl(lat: number, lng: number): string {

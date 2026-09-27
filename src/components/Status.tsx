@@ -11,7 +11,15 @@ interface Props {
 }
 
 // One-line status for list rows: coloured dot, label, age.
-export function StatusLine({ status, reportedAt, lifecycle }: Props) {
+export function StatusLine({ status, reportedAt, lifecycle, confirmed = true }: Props & { confirmed?: boolean }) {
+  if (!confirmed) {
+    return (
+      <span className="status status-unknown">
+        <span className="pill-unconfirmed">Unconfirmed</span>
+        {status && reportedAt ? `${STATUS[status].label} ${timeAgo(reportedAt)}` : 'Added by a visitor'}
+      </span>
+    )
+  }
   if (lifecycle === 'suspected_removed') return <span className="status status-unknown">Possibly removed</span>
   if (!status || !reportedAt) return <span className="status status-unknown">No reports yet</span>
   const stale = isStale(reportedAt)
