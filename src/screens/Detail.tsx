@@ -77,6 +77,7 @@ export function Detail() {
 
   const tone = toneOf(atm.last_status, atm.lifecycle)
   const stale = atm.last_reported_at ? isStale(atm.last_reported_at) : false
+  const card = statusCard(atm, stale)
 
   return (
     <Screen
@@ -118,47 +119,52 @@ export function Detail() {
         </Link>
       </div>
 
-      <section className={`status-card tone-bg-${stale ? 'unknown' : tone}`}>
-        <StatusIcon tone={stale ? 'unknown' : tone} size={48} />
+      {/* Old reports keep their icon but faded and without colour, so it reads as "last known", not "now". */}
+      <section className={`status-card${stale ? '' : ` tone-bg-${tone}`}`}>
+        <StatusIcon tone={tone} size={48} faded={stale} />
         <div>
-          <h2>
-            {atm.lifecycle === 'suspected_removed'
-              ? 'Possibly removed'
-              : atm.last_status
-                ? STATUS[atm.last_status].long
-                : 'No reports yet'}
-          </h2>
-          <p>
-            {atm.lifecycle === 'suspected_removed'
-              ? 'Only “not working” reports for a week. Tap Report if you see it working.'
-              : !atm.last_reported_at
-                ? 'Used this ATM? Tap Report so others know.'
-                : stale
-                  ? `Last report ${timeAgo(atm.last_reported_at)}. It may have changed since.`
-                  : `Reported ${timeAgo(atm.last_reported_at)}`}
-          </p>
+          <h2>{card.heading}</h2>
+          <p>{card.note}</p>
         </div>
       </section>
 
       {justReported && <ContactCard source="after_report" />}
 
-      <h3 className="group-header">Recent reports</h3>
-      {history.length === 0 ? (
-        <div className="group group-empty">No reports yet</div>
-      ) : (
-        <ul className="group">
-          {history.map((h, i) => (
-            <li key={i} className="cell cell-history">
-              <StatusIcon tone={h.status} size={28} />
-              <span className="cell-title">{STATUS[h.status].long}</span>
-              <span className="cell-meta">{timeAgo(h.created_at)}</span>
-            </li>
-          ))}
-        </ul>
+      {/* One report is already shown in the card above; list history only once there's more. */}
+      {history.length > 1 && (
+        <>
+          <h3 className="group-header">Recent reports</h3>
+          <ul className="group">
+            {history.map((h, i) => (
+              <li key={i} className="cell cell-history">
+                <StatusIcon tone={h.status} size={28} />
+                <span className="cell-title">{STATUS[h.status].long}</span>
+                <span className="cell-meta">{timeAgo(h.created_at)}</span>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
       <p className="group-footer">Reports are anonymous. You can report each ATM once every 10 minutes.</p>
     </Screen>
   )
+}
+
+function statusCard(atm: Atm, stale: boolean): { heading: string; note: string } {
+  if (atm.lifecycle === 'suspected_removed') {
+    return {
+      heading: 'Possibly removed',
+      note: 'Only “not working” reports for a week. Tap Report if you see it working.',
+    }
+  }
+  if (!atm.last_status || !atm.last_reported_at) {
+    return { heading: 'No reports yet', note: 'Used this ATM? Tap Report so others know.' }
+  }
+  const { label, long } = STATUS[atm.last_status]
+  const ago = timeAgo(atm.last_reported_at)
+  return stale
+    ? { heading: `Last reported ${label.toLowerCase()}`, note: `${ago}. It may have changed since.` }
+    : { heading: long, note: `Reported ${ago}` }
 }
 
 const OPTIONS: { status: ReportStatus; hint: string }[] = [

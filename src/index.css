@@ -242,6 +242,9 @@ a.cell:active, button.cell:active:not(:disabled) { background: var(--cell-presse
 .status-dot { width: 8px; height: 8px; border-radius: 50%; }
 
 .status-icon { display: inline-grid; place-items: center; flex: none; border-radius: 50%; color: #fff; }
+.status-icon-faded.tone-working { background: color-mix(in srgb, var(--green) 45%, var(--cell)); }
+.status-icon-faded.tone-no_cash { background: color-mix(in srgb, var(--orange) 45%, var(--cell)); }
+.status-icon-faded.tone-not_working { background: color-mix(in srgb, var(--red) 45%, var(--cell)); }
 .tone-working { background: var(--green); }
 .tone-no_cash { background: var(--orange); }
 .tone-not_working { background: var(--red); }

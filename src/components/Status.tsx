@@ -24,10 +24,10 @@ export function StatusLine({ status, reportedAt, lifecycle }: Props) {
   )
 }
 
-export function StatusIcon({ tone, size = 28 }: { tone: Tone; size?: number }) {
+export function StatusIcon({ tone, size = 28, faded }: { tone: Tone; size?: number; faded?: boolean }) {
   const icon: IconName = tone === 'unknown' ? 'question' : STATUS[tone].icon
   return (
-    <span className={`status-icon tone-${tone}`} style={{ width: size, height: size }}>
+    <span className={`status-icon tone-${tone}${faded ? ' status-icon-faded' : ''}`} style={{ width: size, height: size }}>
       <Icon name={icon} size={Math.round(size * 0.58)} stroke={2.6} />
     </span>
   )
