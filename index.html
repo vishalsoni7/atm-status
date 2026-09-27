@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="ATM Status" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>ATM Status</title>
+    <!-- Launch screen styles live here so it paints before any JS loads. -->
+    <style>
+      #splash {
+        position: absolute; inset: 0; z-index: 100;
+        display: grid; place-content: center; justify-items: center; gap: 18px;
+        background: var(--bg, #F2F2F7);
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      }
+      @media (prefers-color-scheme: dark) { #splash { background: #000; } }
+      #splash svg {
+        width: 108px; height: 108px; overflow: visible;
+        filter: drop-shadow(0 10px 24px rgba(59, 63, 217, .35));
+        animation: splash-pop .7s cubic-bezier(.34, 1.56, .64, 1) both;
+      }
+      #splash .dot, #splash .ping { transform-box: fill-box; transform-origin: center; }
+      #splash .dot { animation: splash-dot .5s .4s cubic-bezier(.34, 1.8, .64, 1) both; }
+      #splash .ping { opacity: 0; animation: splash-ping .8s .65s ease-out forwards; }
+      #splash .name {
+        font-size: 24px; font-weight: 700; letter-spacing: -.02em; color: #000;
+        animation: splash-rise .5s .3s cubic-bezier(.32, .72, 0, 1) both;
+      }
+      @media (prefers-color-scheme: dark) { #splash .name { color: #fff; } }
+      #splash .tag {
+        margin-top: -12px; font-size: 15px; color: rgba(60, 60, 67, .6);
+        animation: splash-rise .5s .45s cubic-bezier(.32, .72, 0, 1) both;
+      }
+      @media (prefers-color-scheme: dark) { #splash .tag { color: rgba(235, 235, 245, .6); } }
+      #splash.out { animation: splash-out .4s cubic-bezier(.4, 0, 1, 1) forwards; pointer-events: none; }
+      @keyframes splash-pop { from { transform: scale(.4); opacity: 0; } }
+      @keyframes splash-dot { from { transform: scale(0); } }
+      @keyframes splash-ping { from { transform: scale(1); opacity: .6; } to { transform: scale(2.6); opacity: 0; } }
+      @keyframes splash-rise { from { transform: translateY(10px); opacity: 0; } }
+      @keyframes splash-out { to { transform: scale(1.12); opacity: 0; } }
+      @media (prefers-reduced-motion: reduce) {
+        #splash *, #splash.out { animation-duration: .01s !important; animation-delay: 0s !important; }
+        #splash.out { animation: splash-fade .25s forwards !important; }
+        @keyframes splash-fade { to { opacity: 0; } }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="device">
+      <div id="root"></div>
+      <div id="splash" aria-hidden="true">
+        <svg viewBox="0 0 512 512">
+          <defs>
+            <linearGradient id="s-bg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="512">
+              <stop offset="0" stop-color="#5257F2" />
+              <stop offset="1" stop-color="#2B2EB5" />
+            </linearGradient>
+            <linearGradient id="s-ring" href="#s-bg" y1="-18" y2="494" />
+          </defs>
+          <rect width="512" height="512" rx="114" fill="url(#s-bg)" />
+          <g transform="translate(0 18)">
+            <rect x="112" y="136" width="288" height="200" rx="40" fill="#fff" />
+            <rect x="148" y="172" width="216" height="92" rx="18" fill="#3B3FD9" opacity=".16" />
+            <rect x="196" y="290" width="120" height="16" rx="8" fill="#3B3FD9" opacity=".45" />
+            <rect x="164" y="368" width="184" height="22" rx="11" fill="#fff" opacity=".5" />
+            <circle class="ping" cx="390" cy="142" r="52" fill="#34C759" />
+            <circle class="dot" cx="390" cy="142" r="52" fill="#34C759" stroke="url(#s-ring)" stroke-width="22" />
+          </g>
+        </svg>
+        <div class="name">ATM Status</div>
+        <div class="tag">Know before you go</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

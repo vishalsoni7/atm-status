@@ -1,0 +1,6 @@
+source_ref,bank,lat,lng,address,landmark,keep,notes
+osm:node/2904828146,HDFC Bank,25.334426,74.642367,,,yes,
+osm:node/2904828147,State Bank of India,25.334203,74.642284,,,yes,
+osm:node/2905658869,State Bank of India,25.337936,74.640867,,,yes,
+osm:node/2907771949,Bank of Baroda,25.344088,74.639383,,,yes,bank branch with atm=yes
+osm:way/286652661,State Bank of India,25.342921,74.638248,Bhopal Ganj,,yes,bank branch with atm=yes
