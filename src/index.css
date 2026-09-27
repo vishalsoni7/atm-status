@@ -77,10 +77,20 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #device { position: fixed; inset: 0; overflow: hidden; background: var(--bg); isolation: isolate; }
 #root { position: absolute; inset: 0; }
 
-/* On a laptop, show the app in a phone frame instead of stretched across the screen. */
-@media (min-width: 700px) and (min-height: 720px) {
+/* On a laptop, keep the app phone-width in the centre instead of stretched across the screen. */
+@media (min-width: 700px) {
   html { background: #E3E3E8; }
   body { background: radial-gradient(circle at 50% 30%, #FAFAFC, #DCDCE2); }
+  #device { left: 50%; right: auto; width: 430px; transform: translateX(-50%); box-shadow: 0 0 40px rgba(0, 0, 0, 0.12); }
+  @media (prefers-color-scheme: dark) {
+    html { background: #111; }
+    body { background: radial-gradient(circle at 50% 30%, #2A2A2E, #0E0E10); }
+    #device { box-shadow: 0 0 0 0.5px #2C2C2E; }
+  }
+}
+
+/* Tall enough for a whole phone: show it in a phone frame. */
+@media (min-width: 700px) and (min-height: 720px) {
   #device {
     inset: auto; top: 50%; left: 50%;
     width: 393px; height: min(852px, calc(100vh - 48px));
@@ -94,10 +104,6 @@ button { font: inherit; color: inherit; cursor: pointer; }
   #device::before {
     content: ''; position: absolute; z-index: 200; top: 11px; left: 50%;
     width: 124px; height: 36px; margin-left: -62px; border-radius: 20px; background: #000;
-  }
-  @media (prefers-color-scheme: dark) {
-    html { background: #111; }
-    body { background: radial-gradient(circle at 50% 30%, #2A2A2E, #0E0E10); }
   }
 }
 
