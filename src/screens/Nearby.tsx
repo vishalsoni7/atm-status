@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AppFooter } from '../components/AppFooter'
+import { AtAtmPrompt } from '../components/AtAtmPrompt'
 import { ContactCard } from '../components/ContactCard'
 import { Icon, Spinner } from '../components/Icon'
 import { Screen } from '../components/Screen'
 import { BankBadge, StatusLine } from '../components/Status'
 import { fetchNearby } from '../lib/api'
+import { atmsHere } from '../lib/here'
 import { FALLBACK, formatDistance, usePosition } from '../lib/location'
 import type { NearbyAtm } from '../lib/types'
 
@@ -32,6 +34,7 @@ export function Nearby() {
     load()
   }, [load])
 
+  const here = atmsHere(pos, atms)
   const working = atms?.filter((a) => a.last_status === 'working' && a.lifecycle === 'active').length ?? 0
 
   return (
@@ -40,6 +43,8 @@ export function Nearby() {
         <Icon name={pos?.approximate ? 'pin' : 'location'} size={15} stroke={2.2} />
         {pos?.approximate ? `Around central ${FALLBACK.label}` : 'Sorted by distance from you'}
       </p>
+
+      {here.length > 0 && <AtAtmPrompt key={here.map((a) => a.id).join()} atms={here} onReported={load} />}
 
       {pos?.approximate && (
         <div className="banner">

@@ -282,6 +282,46 @@ a.cell:active, button.cell:active:not(:disabled) { background: var(--cell-presse
 }
 .pill-btn:active { opacity: 0.5; }
 
+/* ---------- "You're at an ATM" prompt ---------- */
+
+.here-card {
+  display: grid; gap: 12px; margin-bottom: 22px; padding: 16px; border-radius: 16px;
+  background: var(--cell); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tint) 45%, transparent);
+  animation: here-in 0.5s var(--spring) both;
+}
+.here-head { display: flex; align-items: center; gap: 12px; }
+.here-title { flex: 1; min-width: 0; }
+.here-title h3 { margin: 0; font-size: 17px; line-height: 22px; font-weight: 600; }
+.here-title p { margin: 1px 0 0; overflow: hidden; font-size: 15px; color: var(--label2); white-space: nowrap; text-overflow: ellipsis; }
+.here-dismiss {
+  display: grid; place-items: center; flex: none; align-self: flex-start; width: 24px; height: 24px;
+  border: 0; border-radius: 50%; background: var(--fill); color: var(--label2);
+}
+.here-dismiss:active { opacity: 0.5; }
+.here-choices { display: grid; gap: 8px; }
+.here-choice {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 8px;
+  border: 0; border-radius: 12px; background: var(--fill); color: var(--label); font-weight: 600; text-align: left;
+}
+.here-choice-name { flex: 1; }
+.here-choice > svg { color: var(--label3); }
+.here-choice:active { opacity: 0.6; }
+.here-question { margin: 0; font-size: 20px; line-height: 25px; font-weight: 700; }
+.here-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.here-btn {
+  display: grid; justify-items: center; gap: 4px; padding: 12px 4px 10px;
+  border: 0; border-radius: 12px; font-size: 13px; font-weight: 600;
+  transition: transform 0.15s var(--ease), opacity 0.15s;
+}
+.here-btn:active:not(:disabled) { transform: scale(0.95); }
+.here-btn:disabled { opacity: 0.6; }
+.here-working { background: color-mix(in srgb, var(--green) 16%, var(--cell)); color: var(--green-text); }
+.here-no_cash { background: color-mix(in srgb, var(--orange) 16%, var(--cell)); color: var(--orange-text); }
+.here-not_working { background: color-mix(in srgb, var(--red) 14%, var(--cell)); color: var(--red-text); }
+.here-message { margin: 0; font-size: 13px; line-height: 18px; color: var(--orange-text); }
+.here-done { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 15px; font-weight: 600; color: var(--green-text); }
+@keyframes here-in { from { transform: translateY(-8px) scale(0.98); opacity: 0; } }
+
 /* ---------- Optional contact card ---------- */
 
 .contact-card { display: grid; gap: 12px; margin-bottom: 20px; padding: 16px; border-radius: 16px; background: var(--cell); }
@@ -378,7 +418,7 @@ a.cell:active, button.cell:active:not(:disabled) { background: var(--cell-presse
 
 @media (prefers-reduced-motion: reduce) {
   .page, .page::after, #root.revealed .page-in-none { animation: none !important; }
-  .sheet, .sheet-backdrop, .hud { animation-duration: 0.01s !important; }
+  .sheet, .sheet-backdrop, .hud, .here-card { animation-duration: 0.01s !important; }
   .hud { animation: fade-in 0.15s both, fade-out 0.2s 1.3s forwards; }
   .hud-check path { animation: none; stroke-dashoffset: 0; }
   .content-settle, .sheet { transition: none; }
