@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-// How far around the user we look for ATMs.
-export const SEARCH_RADIUS_M = 10_000
+// How far around the user we look for ATMs. The database caps this (see 0006).
+export const SEARCH_RADIUS_M = 20_000
 
 export interface Position {
   lat: number
