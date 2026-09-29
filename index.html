@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#F6F7F4" />
+    <meta name="color-scheme" content="light only" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -13,43 +13,39 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>ATM Status</title>
-    <!-- Launch screen styles live here so it paints before any JS loads. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Launch screen: paints before any JS, gone in under a second. It never
+         blocks the app: the map loads underneath and taps pass straight through. -->
     <style>
       #splash {
-        position: absolute; inset: 0; z-index: 100;
-        display: grid; place-content: center; justify-items: center; gap: 18px;
-        background: var(--bg, #F2F2F7);
-        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+        position: absolute; inset: 0; z-index: 100; pointer-events: none;
+        display: grid; place-content: center; justify-items: center; gap: 14px;
+        background: #F6F7F4;
+        font-family: 'Figtree', system-ui, sans-serif;
       }
-      @media (prefers-color-scheme: dark) { #splash { background: #000; } }
       #splash svg {
-        width: 108px; height: 108px; overflow: visible;
-        filter: drop-shadow(0 10px 24px rgba(59, 63, 217, .35));
-        animation: splash-pop .7s cubic-bezier(.34, 1.56, .64, 1) both;
+        width: 96px; height: 96px; overflow: visible;
+        filter: drop-shadow(0 10px 24px rgba(28, 79, 209, .28));
+        animation: splash-pop .45s cubic-bezier(.34, 1.56, .64, 1) both;
       }
       #splash .dot, #splash .ping { transform-box: fill-box; transform-origin: center; }
-      #splash .dot { animation: splash-dot .5s .4s cubic-bezier(.34, 1.8, .64, 1) both; }
-      #splash .ping { opacity: 0; animation: splash-ping .8s .65s ease-out forwards; }
+      #splash .dot { animation: splash-dot .3s .2s cubic-bezier(.34, 1.8, .64, 1) both; }
+      #splash .ping { opacity: 0; animation: splash-ping .45s .35s ease-out forwards; }
       #splash .name {
-        font-size: 24px; font-weight: 700; letter-spacing: -.02em; color: #000;
-        animation: splash-rise .5s .3s cubic-bezier(.32, .72, 0, 1) both;
+        font-family: 'Bricolage Grotesque', 'Figtree', sans-serif;
+        font-size: 24px; font-weight: 700; letter-spacing: -.015em; color: #15181B;
+        animation: splash-rise .35s .15s cubic-bezier(.32, .72, 0, 1) both;
       }
-      @media (prefers-color-scheme: dark) { #splash .name { color: #fff; } }
-      #splash .tag {
-        margin-top: -12px; font-size: 15px; color: rgba(60, 60, 67, .6);
-        animation: splash-rise .5s .45s cubic-bezier(.32, .72, 0, 1) both;
-      }
-      @media (prefers-color-scheme: dark) { #splash .tag { color: rgba(235, 235, 245, .6); } }
-      #splash.out { animation: splash-out .4s cubic-bezier(.4, 0, 1, 1) forwards; pointer-events: none; }
-      @keyframes splash-pop { from { transform: scale(.4); opacity: 0; } }
+      #splash.out { animation: splash-out .25s ease-in forwards; }
+      @keyframes splash-pop { from { transform: scale(.5); opacity: 0; } }
       @keyframes splash-dot { from { transform: scale(0); } }
-      @keyframes splash-ping { from { transform: scale(1); opacity: .6; } to { transform: scale(2.6); opacity: 0; } }
-      @keyframes splash-rise { from { transform: translateY(10px); opacity: 0; } }
-      @keyframes splash-out { to { transform: scale(1.12); opacity: 0; } }
+      @keyframes splash-ping { from { transform: scale(1); opacity: .6; } to { transform: scale(2.4); opacity: 0; } }
+      @keyframes splash-rise { from { transform: translateY(8px); opacity: 0; } }
+      @keyframes splash-out { to { opacity: 0; } }
       @media (prefers-reduced-motion: reduce) {
         #splash *, #splash.out { animation-duration: .01s !important; animation-delay: 0s !important; }
-        #splash.out { animation: splash-fade .25s forwards !important; }
-        @keyframes splash-fade { to { opacity: 0; } }
       }
     </style>
   </head>
@@ -76,7 +72,6 @@
           </g>
         </svg>
         <div class="name">ATM Status</div>
-        <div class="tag">Know before you go</div>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>

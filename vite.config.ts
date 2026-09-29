@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -8,6 +9,7 @@ export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
@@ -15,8 +17,8 @@ export default defineConfig({
         name: 'ATM Status',
         short_name: 'ATM Status',
         description: 'Check if a nearby ATM is working before you go.',
-        theme_color: '#F2F2F7',
-        background_color: '#F2F2F7',
+        theme_color: '#F6F7F4',
+        background_color: '#F6F7F4',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
@@ -34,6 +36,18 @@ export default defineConfig({
             urlPattern: ({ url }) => url.pathname.startsWith('/rest/v1/rpc/'),
             handler: 'NetworkFirst',
             options: { cacheName: 'api', networkTimeoutSeconds: 5 },
+          },
+          {
+            // Google Fonts (stylesheet + font files).
+            urlPattern: ({ url }) => url.host === 'fonts.googleapis.com' || url.host === 'fonts.gstatic.com',
+            handler: 'CacheFirst',
+            options: { cacheName: 'fonts', expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 } },
+          },
+          {
+            // Map tiles already viewed stay available offline (a week, as OSM's policy expects).
+            urlPattern: ({ url }) => url.host === 'tile.openstreetmap.org',
+            handler: 'CacheFirst',
+            options: { cacheName: 'tiles', expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 7 } },
           },
         ],
       },

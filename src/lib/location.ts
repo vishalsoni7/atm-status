@@ -3,6 +3,9 @@ import { useEffect, useState } from 'react'
 // How far around the user we look for ATMs. The database caps this (see 0006).
 export const SEARCH_RADIUS_M = 20_000
 
+// India, for when we don't know where the user is yet.
+export const INDIA_VIEW = { center: { lat: 22.5, lng: 79 }, zoom: 5 }
+
 export interface Position {
   lat: number
   lng: number
@@ -59,4 +62,27 @@ export function directionsUrl(lat: number, lng: number): string {
 
 export function formatDistance(m: number): string {
   return m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(1)} km`
+}
+
+// Straight-line distance in metres.
+export function distanceM(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const rad = Math.PI / 180
+  const dLat = (b.lat - a.lat) * rad
+  const dLng = (b.lng - a.lng) * rad
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLng / 2) ** 2
+  return 2 * 6_371_000 * Math.asin(Math.sqrt(h))
+}
+
+// "about 5 min walk" at a relaxed ~80 m per minute.
+export function walkLabel(m: number): string {
+  const mins = Math.max(1, Math.round(m / 80))
+  return mins > 90 ? 'too far to walk' : `about ${mins} min walk`
+}
+
+// Reports must come from someone at the ATM.
+export const REPORT_RADIUS_M = 150
+
+// Allow for GPS drift, but not so much that a vague fix counts as "here".
+export function isCloseEnough(distance: number, accuracy: number): boolean {
+  return distance - Math.min(accuracy, 100) <= REPORT_RADIUS_M
 }

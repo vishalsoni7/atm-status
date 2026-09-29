@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode, type TouchEvent } from 'react'
 import { Icon } from './Icon'
 
-const CLOSE_MS = 280
+const CLOSE_MS = 250
 
 interface Props {
   open: boolean
@@ -10,7 +10,7 @@ interface Props {
   children: ReactNode
 }
 
-// iOS-style bottom sheet: slides up, dims the page, drag down or tap outside to close.
+// Modal bottom sheet: slides up over a dimmed screen; drag down, tap outside or Esc to close.
 export function Sheet({ open, title, onClose, children }: Props) {
   const [mounted, setMounted] = useState(open)
   const [drag, setDrag] = useState(0)
@@ -53,21 +53,25 @@ export function Sheet({ open, title, onClose, children }: Props) {
   }
 
   return (
-    <div className={`sheet-layer${open ? '' : ' sheet-closing'}`}>
-      <div className="sheet-backdrop" onClick={onClose} style={drag ? { opacity: Math.max(0.2, 1 - drag / 400) } : undefined} />
+    <div className="absolute inset-0 z-[1000]">
+      <div
+        className={`absolute inset-0 bg-ink/40 ${open ? 'anim-fade-in' : 'anim-fade-out'}`}
+        onClick={onClose}
+        style={drag ? { opacity: Math.max(0.2, 1 - drag / 400) } : undefined}
+      />
       <section
-        className="sheet"
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        style={drag ? { transform: `translateY(${drag}px)`, transition: dragging ? 'none' : undefined } : undefined}
+        className={`scroll-y absolute inset-x-0 bottom-0 max-h-[92%] rounded-t-[24px] bg-white px-5 pb-[calc(var(--safe-bottom)+20px)] shadow-[0_-6px_24px_rgba(21,24,27,0.10)] ${open ? 'anim-sheet-up' : 'anim-sheet-down'}`}
+        style={drag ? { transform: `translateY(${drag}px)`, transition: dragging ? 'none' : 'transform .3s' } : undefined}
       >
-        <div className="sheet-grab" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-          <span className="grabber" />
-          <div className="sheet-head">
-            <h2>{title}</h2>
-            <button className="sheet-close" onClick={onClose} aria-label="Close">
-              <Icon name="xmark" size={14} stroke={3} />
+        <div className="cursor-grab touch-none pt-2.5" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+          <div className="mx-auto h-[5px] w-10 rounded-full bg-chip" aria-hidden="true" />
+          <div className="flex items-center justify-between gap-3 pt-4 pb-3">
+            <h2 className="font-display text-2xl font-bold tracking-[-0.01em]">{title}</h2>
+            <button onClick={onClose} aria-label="Close" className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-soft text-ink">
+              <Icon name="xmark" size={20} />
             </button>
           </div>
         </div>
@@ -77,14 +81,15 @@ export function Sheet({ open, title, onClose, children }: Props) {
   )
 }
 
-// Centred frosted confirmation, like iOS's "Added to Library" HUD.
-export function Hud({ text }: { text: string }) {
+// Short confirmation at the bottom of the screen ("ATM added").
+export function Toast({ text }: { text: string }) {
   return (
-    <div className="hud" role="status">
-      <svg className="hud-check" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M5 12.5l4.5 4.5L19 7.5" pathLength="1" />
-      </svg>
-      <span>{text}</span>
+    <div
+      role="status"
+      className="anim-toast absolute bottom-[calc(var(--safe-bottom)+24px)] left-1/2 z-[1100] flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-ink px-4 py-3 text-[15px] font-semibold text-white shadow-lg"
+    >
+      <span className="flex size-5 items-center justify-center rounded-full bg-ok"><Icon name="check" size={13} stroke={3.2} /></span>
+      {text}
     </div>
   )
 }

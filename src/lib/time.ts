@@ -7,10 +7,3 @@ export function timeAgo(iso: string, now = Date.now()): string {
   const days = Math.round(hrs / 24)
   return `${days} day${days === 1 ? '' : 's'} ago`
 }
-
-// Reports older than this are shown greyed out as "last known".
-export const STALE_AFTER_MS = 6 * 60 * 60 * 1000
-
-export function isStale(iso: string, now = Date.now()): boolean {
-  return now - new Date(iso).getTime() > STALE_AFTER_MS
-}

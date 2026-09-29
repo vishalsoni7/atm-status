@@ -60,11 +60,15 @@ export function AddAtmForm({ onAdded }: { onAdded: () => void }) {
     }
   }
 
-  return (
-    <form className="sheet-body add-atm" onSubmit={submit}>
-      <p className="sheet-sub">Stand at the ATM. We'll pin it at your current location.</p>
+  const rough = fix.status === 'found' && fix.pos.accuracy > GOOD_ACCURACY_M
+  const fixTone =
+    fix.status === 'found' && !rough ? 'bg-ok-soft text-ok-ink' : fix.status === 'locating' ? 'bg-soft text-muted' : 'bg-down-soft text-down-ink'
 
-      <div className={`fix fix-${fix.status === 'found' && fix.pos.accuracy > GOOD_ACCURACY_M ? 'rough' : fix.status}`}>
+  return (
+    <form className="flex flex-col gap-5" onSubmit={submit}>
+      <p className="-mt-1 text-[15px] text-muted">Stand at the ATM. We'll pin it at your current location.</p>
+
+      <div className={`flex flex-wrap items-center gap-2 rounded-[14px] px-3.5 py-3 text-sm font-semibold ${fixTone}`}>
         {fix.status === 'locating' ? (
           <>
             <Spinner size={18} />
@@ -72,47 +76,57 @@ export function AddAtmForm({ onAdded }: { onAdded: () => void }) {
           </>
         ) : fix.status === 'failed' ? (
           <>
-            <Icon name="location" size={18} stroke={2.2} />
-            <span>Couldn't get your location. Turn on location (GPS) and allow it for this site.</span>
-            <button type="button" className="link-btn" onClick={relocate}>Try again</button>
+            <Icon name="pinOff" size={18} />
+            <span className="flex-1">Couldn't get your location. Turn on location (GPS) and allow it for this site.</span>
+            <button type="button" className="font-bold text-primary" onClick={relocate}>Try again</button>
           </>
-        ) : fix.pos.accuracy > GOOD_ACCURACY_M ? (
+        ) : rough ? (
           <>
-            <Icon name="location" size={18} stroke={2.2} />
-            <span>Location is rough (±{Math.round(fix.pos.accuracy)} m). Step outside or wait a moment for a better fix.</span>
-            <button type="button" className="link-btn" onClick={relocate}>Retry</button>
+            <Icon name="pin" size={18} />
+            <span className="flex-1">Location is rough (±{Math.round(fix.pos.accuracy)} m). Step outside or wait a moment.</span>
+            <button type="button" className="font-bold text-primary" onClick={relocate}>Retry</button>
           </>
         ) : (
           <>
-            <Icon name="location" size={18} stroke={2.2} />
+            <Icon name="pin" size={18} />
             <span>Location found (±{Math.round(fix.pos.accuracy)} m)</span>
           </>
         )}
       </div>
 
-      <h3 className="group-header">Bank</h3>
-      <BankPicker value={bank} onChange={setBank} />
+      <div className="flex flex-col gap-2">
+        <h3 className="text-[15px] font-bold">Bank</h3>
+        <BankPicker value={bank} onChange={setBank} />
+      </div>
 
-      <h3 className="group-header">Landmark (optional)</h3>
-      <input
-        className="text-field"
-        type="text"
-        placeholder="e.g. Next to the bus stand"
-        maxLength={120}
-        value={landmark}
-        onChange={(e) => setLandmark(e.target.value)}
-      />
+      <label className="flex flex-col gap-2">
+        <span className="text-[15px] font-bold">
+          Landmark <span className="font-medium text-muted">(optional)</span>
+        </span>
+        <input
+          type="text"
+          placeholder="e.g. Next to the bus stand"
+          maxLength={120}
+          value={landmark}
+          onChange={(e) => setLandmark(e.target.value)}
+          className="h-12 rounded-[14px] border-[1.5px] border-chip px-3.5 text-base outline-none placeholder:text-faint focus:border-primary"
+        />
+      </label>
 
       {duplicateId && (
-        <p className="sheet-message">
+        <p className="text-sm text-down-ink">
           This ATM is already listed.{' '}
-          <Link to={`/atm/${duplicateId}`} replace>View it</Link>
+          <Link to={`/atm/${duplicateId}`} className="font-bold">View it</Link>
         </p>
       )}
-      {error && <p className="sheet-message">{error}</p>}
+      {error && <p className="text-sm text-down-ink">{error}</p>}
 
-      <button className="primary-btn" type="submit" disabled={sending || fix.status !== 'found' || bank.length < 2}>
-        {sending ? <Spinner size={20} /> : <><Icon name="plus" size={20} stroke={2.6} /> Add ATM</>}
+      <button
+        type="submit"
+        disabled={sending || fix.status !== 'found' || bank.length < 2}
+        className="sticky bottom-0 flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-[17px] font-bold text-white shadow-[0_-16px_0_8px_white,0_12px_0_8px_white] disabled:bg-disabled disabled:text-faint"
+      >
+        {sending ? <Spinner size={20} /> : bank.length < 2 ? 'Choose a bank' : <><Icon name="plus" size={20} stroke={2.6} /> Add ATM</>}
       </button>
     </form>
   )

@@ -3,17 +3,6 @@ import { InvalidContactError, saveContact, type ContactSource } from '../lib/api
 import { markContactSaved, useContactSaved } from '../lib/contact'
 import { Icon, Spinner } from './Icon'
 
-const COPY: Record<ContactSource, { title: string; text: string }> = {
-  home: {
-    title: 'Stay in touch',
-    text: 'Leave your email or mobile number. This is optional.',
-  },
-  after_report: {
-    title: 'Thanks for reporting',
-    text: "Leave your email or mobile number if you'd like. This is optional.",
-  },
-}
-
 // Optional: asks for an email or mobile number until it's saved, then hides.
 export function ContactCard({ source }: { source: ContactSource }) {
   const saved = useContactSaved()
@@ -43,17 +32,18 @@ export function ContactCard({ source }: { source: ContactSource }) {
     }
   }
 
-  const { title, text } = COPY[source]
   return (
-    <section className="contact-card" aria-labelledby={`contact-${source}`}>
-      <div className="contact-head">
-        <span className="contact-icon"><Icon name="mail" size={18} stroke={2.2} /></span>
+    <section className="flex flex-col gap-3 rounded-[18px] bg-ground p-4" aria-labelledby={`contact-${source}`}>
+      <div className="flex items-start gap-3">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-info-soft text-primary">
+          <Icon name="mail" size={18} />
+        </span>
         <div>
-          <h3 id={`contact-${source}`}>{title}</h3>
-          <p>{text}</p>
+          <h3 id={`contact-${source}`} className="text-base font-bold">Stay in touch</h3>
+          <p className="text-sm text-muted">Leave your email or mobile number. This is optional.</p>
         </div>
       </div>
-      <form className="contact-form" onSubmit={submit} noValidate>
+      <form className="flex gap-2" onSubmit={submit} noValidate>
         <input
           type="text"
           inputMode="email"
@@ -66,13 +56,14 @@ export function ContactCard({ source }: { source: ContactSource }) {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           disabled={sending}
+          className="h-12 min-w-0 flex-1 rounded-[14px] border-[1.5px] border-chip bg-white px-3.5 text-base outline-none placeholder:text-faint focus:border-primary"
         />
-        <button type="submit" disabled={sending}>
+        <button type="submit" disabled={sending} className="flex h-12 min-w-[76px] items-center justify-center rounded-[14px] bg-primary px-4 font-bold text-white disabled:opacity-60">
           {sending ? <Spinner size={18} /> : 'Save'}
         </button>
       </form>
-      {error && <p className="contact-error">{error}</p>}
-      <p className="contact-note">We may contact you about ATM Status.</p>
+      {error && <p className="text-[13px] text-down-ink">{error}</p>}
+      <p className="text-xs text-muted">We may contact you about ATM Status.</p>
     </section>
   )
 }

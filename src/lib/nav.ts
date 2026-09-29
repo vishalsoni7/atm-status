@@ -7,6 +7,6 @@ export function useBack() {
   return (fallback: string) => {
     const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0
     if (idx > 0) navigate(-1)
-    else navigate(fallback, { replace: true, state: { direction: 'pop' } })
+    else navigate(fallback, { replace: true })
   }
 }

@@ -1,4 +1,12 @@
+// 'no_cash' is only on older reports; new ones use not_working + reason.
 export type ReportStatus = 'working' | 'not_working' | 'no_cash'
+export type ReportReason =
+  | 'no_cash'
+  | 'machine_off'
+  | 'shutter_closed'
+  | 'out_of_service'
+  | 'card_not_accepted'
+  | 'other'
 export type Lifecycle = 'active' | 'suspected_removed' | 'removed'
 
 export interface Atm {
@@ -21,5 +29,6 @@ export interface NearbyAtm extends Atm {
 
 export interface HistoryItem {
   status: ReportStatus
+  reason?: ReportReason | null
   created_at: string
 }

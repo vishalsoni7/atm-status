@@ -1,10 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { RateLimitedError, submitReport } from '../lib/api'
-import { displayBank } from '../lib/banks'
-import { STATUS } from '../lib/status'
-import type { NearbyAtm, ReportStatus } from '../lib/types'
+import { atmName } from '../lib/banks'
+import type { NearbyAtm } from '../lib/types'
 import { Icon, Spinner } from './Icon'
-import { BankBadge, StatusIcon } from './Status'
+import { BankBadge } from './Status'
 
 const DISMISSED_KEY = 'atm-status:at-atm-dismissed'
 
@@ -16,14 +16,13 @@ function readDismissed(): string[] {
   }
 }
 
-const ORDER: ReportStatus[] = ['working', 'no_cash', 'not_working']
-const SHORT: Record<ReportStatus, string> = { working: 'Working', no_cash: 'No cash', not_working: 'Not working' }
-
-// One-tap report card shown at the top of the list when you're at an ATM.
+// Card at the top of the list when you're standing at an ATM. "Working" sends
+// in one tap; "Not working" opens the report screen to pick a reason.
 // With several ATMs in range, it first asks which one.
 export function AtAtmPrompt({ atms, onReported }: { atms: NearbyAtm[]; onReported: () => void }) {
+  const navigate = useNavigate()
   const [chosenId, setChosenId] = useState<string | null>(atms.length === 1 ? atms[0].id : null)
-  const [sending, setSending] = useState<ReportStatus | null>(null)
+  const [sending, setSending] = useState(false)
   const [done, setDone] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [dismissed, setDismissed] = useState(() => atms.every((a) => readDismissed().includes(a.id)))
@@ -40,37 +39,12 @@ export function AtAtmPrompt({ atms, onReported }: { atms: NearbyAtm[]; onReporte
     setDismissed(true)
   }
 
-  if (!atm) {
-    return (
-      <section className="here-card" aria-label="Which ATM are you at?">
-        <div className="here-head">
-          <div className="here-title">
-            <h3>You're at an ATM</h3>
-            <p>Which one? Tap it to report its status.</p>
-          </div>
-          <button className="here-dismiss" onClick={dismiss} aria-label="Not now">
-            <Icon name="xmark" size={12} stroke={3} />
-          </button>
-        </div>
-        <div className="here-choices">
-          {atms.map((a) => (
-            <button key={a.id} className="here-choice" onClick={() => setChosenId(a.id)}>
-              <BankBadge bank={a.bank} size={32} />
-              <span className="here-choice-name">{displayBank(a.bank)}</span>
-              <Icon name="chevronRight" size={14} stroke={2.6} />
-            </button>
-          ))}
-        </div>
-      </section>
-    )
-  }
-
-  async function send(atm: NearbyAtm, status: ReportStatus) {
+  async function working(a: NearbyAtm) {
     navigator.vibrate?.(10)
-    setSending(status)
+    setSending(true)
     setMessage(null)
     try {
-      await submitReport(atm.id, status)
+      await submitReport(a.id, 'working')
       setDone(true)
       onReported()
     } catch (err) {
@@ -80,51 +54,65 @@ export function AtAtmPrompt({ atms, onReported }: { atms: NearbyAtm[]; onReporte
           : "Couldn't send your report. Check your internet connection and try again.",
       )
     } finally {
-      setSending(null)
+      setSending(false)
     }
   }
 
-  const place = atm.landmark ? `near ${atm.landmark}` : atm.address
-  return (
-    <section className="here-card" aria-label={`You're at ${displayBank(atm.bank)}`}>
-      <div className="here-head">
-        <BankBadge bank={atm.bank} size={40} />
-        <div className="here-title">
-          <h3>You're at {atm.bank === 'ATM' ? 'an ATM' : atm.bank}</h3>
-          <p>{place || 'Right next to you'}</p>
-        </div>
-        {!done && (
-          <button className="here-dismiss" onClick={dismiss} aria-label="Not now">
-            <Icon name="xmark" size={12} stroke={3} />
-          </button>
-        )}
-      </div>
+  const close = (
+    <button onClick={dismiss} aria-label="Not now" className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/70 text-ink">
+      <Icon name="xmark" size={16} />
+    </button>
+  )
 
-      {done ? (
-        <p className="here-done" role="status">
-          <StatusIcon tone="working" size={22} />
-          Thanks! Your report helps people nearby.
-        </p>
-      ) : (
-        <>
-          <p className="here-question">Is it working?</p>
-          <div className="here-options">
-            {ORDER.map((s) => (
-              <button
-                key={s}
-                className={`here-btn here-${s}`}
-                disabled={sending !== null}
-                onClick={() => send(atm, s)}
-                aria-label={STATUS[s].long}
-              >
-                {sending === s ? <Spinner size={22} /> : <Icon name={STATUS[s].icon} size={22} stroke={2.4} />}
-                {SHORT[s]}
-              </button>
-            ))}
+  if (!atm) {
+    return (
+      <section className="flex flex-col gap-3 rounded-[18px] bg-info-soft p-4" aria-label="Which ATM are you at?">
+        <div className="flex items-start gap-3">
+          <div className="flex-1">
+            <h2 className="text-lg font-bold text-info-ink">You're at an ATM</h2>
+            <p className="text-sm text-info-ink">Which one? Tap it to report its status.</p>
           </div>
-          {message && <p className="here-message">{message}</p>}
-        </>
+          {close}
+        </div>
+        {atms.map((a) => (
+          <button key={a.id} onClick={() => setChosenId(a.id)} className="flex items-center gap-3 rounded-[14px] bg-white p-2.5 text-left font-semibold">
+            <BankBadge bank={a.bank} size={32} />
+            <span className="flex-1">{atmName(a.bank)}</span>
+            <Icon name="chevronRight" size={18} />
+          </button>
+        ))}
+      </section>
+    )
+  }
+
+  return (
+    <section className="flex flex-col gap-3 rounded-[18px] bg-info-soft p-4" aria-label={`You're at ${atmName(atm.bank)}`}>
+      <div className="flex items-start gap-3">
+        <div className="flex-1">
+          <h2 className="text-lg font-bold text-info-ink">You're at {atmName(atm.bank)}</h2>
+          <p className="text-sm text-info-ink">{done ? 'Thanks! Everyone nearby can see your update.' : 'Is it working right now?'}</p>
+        </div>
+        {!done && close}
+      </div>
+      {!done && (
+        <div className="flex gap-2.5">
+          <button
+            onClick={() => working(atm)}
+            disabled={sending}
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[14px] bg-ok font-bold text-white disabled:opacity-70"
+          >
+            {sending ? <Spinner size={18} /> : <Icon name="check" size={18} stroke={3} />} Working
+          </button>
+          <button
+            onClick={() => navigate(`/atm/${atm.id}/report?answer=no`)}
+            disabled={sending}
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[14px] bg-down font-bold text-white"
+          >
+            <Icon name="xmark" size={18} stroke={3} /> Not working
+          </button>
+        </div>
       )}
+      {message && <p className="text-sm text-info-ink">{message}</p>}
     </section>
   )
 }

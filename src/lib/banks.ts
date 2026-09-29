@@ -55,6 +55,20 @@ export function displayBank(bank: string): string {
   return bank === UNKNOWN_BANK ? 'ATM (bank not known)' : bank
 }
 
+// Names people actually say: "SBI ATM", "HDFC Bank ATM".
+const SPOKEN: Record<string, string> = {
+  'State Bank of India': 'SBI',
+  'Punjab National Bank': 'PNB',
+  'Bank of Baroda': 'Bank of Baroda',
+  'Hitachi Money Spot': 'Hitachi Money Spot',
+}
+
+export function atmName(bank: string): string {
+  if (bank === UNKNOWN_BANK) return 'ATM (bank not known)'
+  const name = SPOKEN[bank] ?? bank
+  return /\batm\b/i.test(name) ? name : `${name} ATM`
+}
+
 // Choices when adding an ATM or naming its bank, most common first.
 export const BANK_CHOICES = [
   'State Bank of India',

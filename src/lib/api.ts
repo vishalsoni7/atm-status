@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { getDeviceId } from './device'
 import { SEARCH_RADIUS_M } from './location'
-import type { Atm, HistoryItem, NearbyAtm, ReportStatus } from './types'
+import type { Atm, HistoryItem, NearbyAtm, ReportReason } from './types'
 
 const url = import.meta.env.VITE_SUPABASE_URL
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -29,8 +29,12 @@ export async function fetchHistory(id: string): Promise<HistoryItem[]> {
 
 export class RateLimitedError extends Error {}
 
-export async function submitReport(atmId: string, status: ReportStatus): Promise<void> {
-  const { error } = await supabase.rpc('submit_report', { atm: atmId, status, device: getDeviceId() })
+export async function submitReport(
+  atmId: string,
+  status: 'working' | 'not_working',
+  reason: ReportReason | null = null,
+): Promise<void> {
+  const { error } = await supabase.rpc('submit_report', { atm: atmId, status, device: getDeviceId(), reason })
   if (error?.message === 'rate_limited') throw new RateLimitedError()
   if (error) throw error
 }
