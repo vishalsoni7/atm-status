@@ -12,6 +12,7 @@ export function AppFooter() {
         </p>
       </div>
       <p>Statuses are reported by people who used the ATM and may be out of date. Not affiliated with any bank. No account needed.</p>
+      <p className="text-center text-[13px] font-semibold text-ink">Be kind to animals 🐾♥️</p>
       <p className="whitespace-nowrap text-center text-[clamp(10px,3.2vw,12px)]">
         © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>
         {' · '}© {YEAR} Vishal Soni
