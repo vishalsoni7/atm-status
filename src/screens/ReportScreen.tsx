@@ -15,7 +15,7 @@ export function ReportScreen() {
   const { id = '' } = useParams()
   const [params] = useSearchParams()
   const goBack = useBack()
-  const { location, retry } = usePosition()
+  const { location, retry, refreshing } = usePosition()
   const [atm, setAtm] = useState<Atm | null | undefined>(undefined)
 
   useEffect(() => {
@@ -42,12 +42,12 @@ export function ReportScreen() {
     body = isCloseEnough(dist, location.pos.accuracy) ? (
       <ReportForm atm={atm} initial={params.get('answer') === 'no' ? 'no' : null} />
     ) : (
-      <TooFar atm={atm} distance={dist} onRetry={retry} />
+      <TooFar atm={atm} distance={dist} onRetry={retry} checking={refreshing} />
     )
   }
 
   return (
-    <div className="scroll-y absolute inset-0 flex flex-col bg-white px-5 pt-[calc(var(--safe-top)+12px)] pb-[calc(var(--safe-bottom)+32px)]">
+    <div className="scroll-y absolute inset-0 flex flex-col bg-surface px-5 pt-[calc(var(--safe-top)+12px)] pb-[calc(var(--safe-bottom)+32px)]">
       <div className="flex shrink-0 items-center justify-between gap-3">
         <p className="min-w-0 truncate text-sm font-semibold text-muted">{subtitle}</p>
         <button onClick={close} aria-label="Close" className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-soft text-ink">
@@ -106,7 +106,7 @@ function ReportForm({ atm, initial }: { atm: Atm; initial: Answer | null }) {
                   type="button"
                   aria-pressed={on}
                   onClick={() => setReason(on ? null : r.id)}
-                  className={`h-11 rounded-full border-[1.5px] px-4 text-[15px] font-semibold ${on ? 'border-ink bg-ink text-white' : 'border-chip bg-white text-ink'}`}
+                  className={`h-11 rounded-full border-[1.5px] px-4 text-[15px] font-semibold ${on ? 'border-ink bg-ink text-on-ink' : 'border-chip bg-surface text-ink'}`}
                 >
                   {r.label}
                 </button>
@@ -146,7 +146,7 @@ function Choice({
   disabled?: boolean
 }) {
   const on = tone === 'ok' ? 'border-ok bg-ok-soft' : 'border-down bg-down-soft'
-  const dot = disabled ? 'bg-[#C9CEC8]' : tone === 'ok' ? 'bg-ok' : 'bg-down'
+  const dot = disabled ? 'bg-chip' : tone === 'ok' ? 'bg-ok' : 'bg-down'
   return (
     <button
       type="button"
@@ -154,7 +154,7 @@ function Choice({
       onClick={onClick}
       disabled={disabled}
       className={`flex min-h-[76px] items-center gap-4 rounded-[18px] border-2 px-[18px] text-left ${
-        disabled ? 'border-line bg-[#F4F5F3] text-faint' : selected ? on : 'border-line bg-white'
+        disabled ? 'border-line bg-soft text-faint' : selected ? on : 'border-line bg-surface'
       }`}
     >
       <span className={`flex size-11 shrink-0 items-center justify-center rounded-full text-white ${dot}`} aria-hidden="true">
@@ -165,7 +165,7 @@ function Choice({
   )
 }
 
-function TooFar({ atm, distance, onRetry }: { atm: Atm; distance: number; onRetry: () => void }) {
+function TooFar({ atm, distance, onRetry, checking }: { atm: Atm; distance: number; onRetry: () => void; checking: boolean }) {
   return (
     <div className="flex flex-1 flex-col gap-6 pt-6">
       <h1 className="font-display text-[32px] leading-[1.12] font-bold tracking-[-0.015em] text-balance">Is this ATM working right now?</h1>
@@ -196,8 +196,13 @@ function TooFar({ atm, distance, onRetry }: { atm: Atm; distance: number; onRetr
         >
           <Icon name="navigate" size={18} /> Get directions
         </a>
-        <button type="button" onClick={onRetry} className="h-12 text-base font-bold text-primary">
-          I'm here now, check again
+        <button
+          type="button"
+          onClick={onRetry}
+          disabled={checking}
+          className="flex h-12 items-center justify-center gap-2 text-base font-bold text-primary disabled:text-muted"
+        >
+          {checking ? <><Spinner size={18} /> Checking your location…</> : "I'm here now, check again"}
         </button>
       </div>
     </div>

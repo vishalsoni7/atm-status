@@ -1,15 +1,11 @@
 import L from 'leaflet'
-import { useEffect } from 'react'
-import { AttributionControl, MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
+import { useEffect, useRef } from 'react'
+import { AttributionControl, MapContainer, Marker, useMap } from 'react-leaflet'
 import { atmName } from '../lib/banks'
+import { CheckedTileLayer } from '../lib/checkedTiles'
 import { TONE, type Tone } from '../lib/status'
+import { tilesFailing, useTileProvider } from '../lib/tiles'
 import { pinHtml } from '../lib/toneStyle'
-
-// OpenStreetMap's own tiles: free and keyless for light use, with attribution
-// (tile usage policy: osm.wiki/Tile_usage_policy). Toned down in CSS to look
-// light and low-detail. At scale, switch to a keyed provider (MapTiler, Stadia).
-const TILES = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 
 const pinIcons = new Map<string, L.DivIcon>()
 function pinIcon(tone: Tone, size = 34): L.DivIcon {
@@ -60,10 +56,10 @@ export function AtmMap({ view, viewKey, bottomInset = 0, me, atms, onSelect, int
       boxZoom={interactive}
       keyboard={interactive}
       attributionControl={false}
-      className="absolute inset-0"
+      className="absolute inset-0 isolate"
     >
       <AttributionControl position="bottomright" prefix={false} />
-      <TileLayer url={TILES} attribution={ATTRIBUTION} maxZoom={19} />
+      <Tiles />
       <ApplyView view={view} viewKey={viewKey} bottomInset={bottomInset} />
       {me && <Marker position={[me.lat, me.lng]} icon={meIcon} interactive={false} keyboard={false} />}
       {atms.map((a) => (
@@ -90,5 +86,64 @@ function ApplyView({ view, viewKey, bottomInset }: { view: Props['view']; viewKe
     // Only when the requested view changes, not on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewKey])
+  return null
+}
+
+// Base map that never stays blank: if MapTiler tiles keep failing, every map
+// in the app switches to the OpenStreetMap backup.
+function Tiles() {
+  const provider = useTileProvider()
+  const map = useMap()
+  const stats = useRef({ ok: 0, failed: 0 })
+
+  useEffect(() => {
+    const options: L.TileLayerOptions = {
+      attribution: provider.attribution,
+      tileSize: provider.tileSize,
+      zoomOffset: provider.zoomOffset,
+      maxZoom: provider.maxZoom,
+      className: provider.className,
+    }
+    const backup = provider.id === 'osm'
+    // MapTiler tiles are fetched so a refusal is detected (see CheckedTileLayer).
+    const layer = backup ? L.tileLayer(provider.url, options) : new CheckedTileLayer(provider.url, options)
+    if (!backup) {
+      layer.on('tileload', () => {
+        stats.current.ok++
+      })
+      layer.on('tileerror', () => {
+        const s = stats.current
+        s.failed++
+        // A few failures, more than successes = the service is refusing us.
+        if (s.failed >= 3 && s.failed > s.ok) tilesFailing()
+      })
+    }
+    layer.addTo(map)
+    return () => {
+      layer.remove()
+    }
+  }, [map, provider])
+
+  return provider.logo ? <MapLogo src={provider.logo} /> : null
+}
+
+// MapTiler logo in the bottom-left corner (required on their free plan).
+function MapLogo({ src }: { src: string }) {
+  const map = useMap()
+  useEffect(() => {
+    const control = new L.Control({ position: 'bottomleft' })
+    control.onAdd = () => {
+      const a = L.DomUtil.create('a', 'map-logo')
+      a.href = 'https://www.maptiler.com'
+      a.target = '_blank'
+      a.rel = 'noreferrer'
+      a.innerHTML = `<img src="${src}" alt="MapTiler" width="67" height="20">`
+      return a
+    }
+    control.addTo(map)
+    return () => {
+      control.remove()
+    }
+  }, [map, src])
   return null
 }

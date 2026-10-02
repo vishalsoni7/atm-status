@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { AddAtmForm } from '../components/AddAtmSheet'
 import { AppFooter } from '../components/AppFooter'
@@ -6,11 +6,12 @@ import { AtAtmPrompt } from '../components/AtAtmPrompt'
 import { AtmMap } from '../components/AtmMap'
 import { ContactCard } from '../components/ContactCard'
 import { Icon, Spinner } from '../components/Icon'
+import { SearchBar } from '../components/SearchBar'
 import { Sheet, Toast } from '../components/Sheet'
 import { BankTile, StatusPill } from '../components/Status'
 import { fetchNearby } from '../lib/api'
 import { atmName } from '../lib/banks'
-import { searchPlace, type Place } from '../lib/geocode'
+import type { Place } from '../lib/geocode'
 import { atmsHere } from '../lib/here'
 import { INDIA_VIEW, SEARCH_RADIUS_M, formatDistance, usePosition } from '../lib/location'
 import { currentTone, whenLabel, type Tone } from '../lib/status'
@@ -43,19 +44,21 @@ export function MapScreen() {
   const [toast, showToast] = useToast()
   const [recenter, setRecenter] = useState(0)
 
-  const load = useCallback(
-    () =>
-      center
-        ? fetchNearby(center.lat, center.lng).then(
-            (a) => {
-              setAtms(a)
-              setError(false)
-            },
-            () => setError(true),
-          )
-        : Promise.resolve(),
-    [center],
-  )
+  // Only the newest request may update the list (searching quickly could
+  // otherwise let a slow, older answer overwrite a newer one).
+  const latestLoad = useRef(0)
+  const load = useCallback(() => {
+    if (!center) return Promise.resolve()
+    const id = ++latestLoad.current
+    return fetchNearby(center.lat, center.lng).then(
+      (a) => {
+        if (id !== latestLoad.current) return
+        setAtms(a)
+        setError(false)
+      },
+      () => id === latestLoad.current && setError(true),
+    )
+  }, [center])
   useEffect(() => {
     load()
   }, [load])
@@ -106,9 +109,10 @@ export function MapScreen() {
   const view = center ? { center, zoom: 15 } : INDIA_VIEW
   const viewKey = `${center?.lat},${center?.lng},${recenter}`
 
+  // Back to "near me", with a fresh fix in case they've moved.
   function showMine() {
     setPlace(null)
-    if (location.status !== 'found') retry()
+    retry()
     setRecenter((n) => n + 1)
   }
 
@@ -116,7 +120,11 @@ export function MapScreen() {
   const radiusKm = SEARCH_RADIUS_M / 1000
 
   return (
-    <div ref={rootRef} className="map-screen absolute inset-0 bg-mapbg" style={{ '--sheet-h': `${sheetH}px` } as React.CSSProperties}>
+    <div
+      ref={rootRef}
+      className={`map-screen absolute inset-0 bg-mapbg ${sheetH > peek + 80 ? 'sheet-open' : ''}`}
+      style={{ '--sheet-h': `${sheetH}px` } as React.CSSProperties}
+    >
       <AtmMap
         view={view}
         viewKey={viewKey}
@@ -126,8 +134,17 @@ export function MapScreen() {
         onSelect={(id) => navigate(`/atm/${id}`)}
       />
 
-      <div className="absolute inset-x-4 top-[calc(var(--safe-top)+12px)] z-[500] flex flex-col gap-2.5">
-        <SearchBar place={place} onPlace={setPlace} />
+      <div className="absolute inset-x-4 top-[calc(var(--safe-top)+12px)] z-[700] flex flex-col gap-2.5">
+        <SearchBar
+          place={place}
+          near={center}
+          atms={withTone}
+          // About 6½ rows, so a half-visible row shows there's more to scroll;
+          // never taller than the room below the search box.
+          listMaxHeight={Math.min(screenH - 90, 360)}
+          onPlace={setPlace}
+          onAtm={(id) => navigate(`/atm/${id}`)}
+        />
         <div role="group" aria-label="Filter ATMs" className="flex gap-2">
           {FILTERS.map((f) => {
             const on = f.id === filter
@@ -137,7 +154,7 @@ export function MapScreen() {
                 type="button"
                 aria-pressed={on}
                 onClick={() => setParams(f.id === 'all' ? {} : { filter: f.id }, { replace: true })}
-                className={`h-10 rounded-full border px-4 text-sm font-semibold shadow-[0_2px_8px_rgba(21,24,27,0.08)] ${on ? 'border-ink bg-ink text-white' : 'border-line bg-white text-ink'}`}
+                className={`h-10 rounded-full border px-4 text-sm font-semibold shadow-[0_2px_8px_rgba(21,24,27,0.08)] ${on ? 'border-ink bg-ink text-on-ink' : 'border-line bg-surface text-ink'}`}
               >
                 {f.label}
               </button>
@@ -151,7 +168,7 @@ export function MapScreen() {
         hidden={sheetH > peek + 80}
         onClick={showMine}
         aria-label="Show my location"
-        className="absolute right-4 z-[500] flex size-12 items-center justify-center rounded-[14px] bg-white text-primary shadow-[0_4px_12px_rgba(21,24,27,0.14)] transition-[bottom] duration-300"
+        className="absolute right-4 z-[500] flex size-12 items-center justify-center rounded-[14px] bg-surface text-primary shadow-[0_4px_12px_rgba(21,24,27,0.14)] transition-[bottom] duration-300"
         style={{ bottom: sheetH + 16 }}
       >
         <Icon name="crosshair" size={22} stroke={2} />
@@ -159,20 +176,20 @@ export function MapScreen() {
 
       <section
         aria-label="Nearby ATMs"
-        className={`absolute inset-x-0 bottom-0 z-[600] flex flex-col rounded-t-[24px] bg-white px-5 shadow-[0_-6px_24px_rgba(21,24,27,0.10)] ${drag === null ? 'transition-[height] duration-300 ease-out' : ''}`}
+        className={`absolute inset-x-0 bottom-0 z-[600] flex flex-col rounded-t-[24px] bg-surface px-5 shadow-[0_-6px_24px_rgba(21,24,27,0.10)] ${drag === null ? 'transition-[height] duration-300 ease-out' : ''}`}
         style={{ height: sheetH }}
       >
         <div
-          className="shrink-0 cursor-grab touch-none select-none pt-2.5"
+          className="shrink-0 cursor-grab touch-none select-none pt-2"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
         >
           <div className="mx-auto h-[5px] w-10 rounded-full bg-chip" aria-hidden="true" />
-          <div className="flex items-end justify-between gap-3 pt-3.5 pb-2">
-            <div className="flex min-w-0 flex-col gap-0.5">
-              <h1 className="font-display text-2xl font-bold tracking-[-0.01em]">Nearby ATMs</h1>
+          <div className="flex items-end justify-between gap-3 pt-2.5 pb-1.5">
+            <div className="flex min-w-0 flex-col">
+              <h1 className="font-display text-[22px] leading-7 font-bold tracking-[-0.01em]">Nearby ATMs</h1>
               <p className="truncate text-[13px] text-muted">
                 {place ? `Around ${place.label}` : 'Status reported by people near you'}
               </p>
@@ -279,65 +296,6 @@ export function MapScreen() {
         />
       </Sheet>
       {toast && <Toast text={toast} />}
-    </div>
-  )
-}
-
-function SearchBar({ place, onPlace }: { place: Place | null; onPlace: (p: Place | null) => void }) {
-  const [query, setQuery] = useState('')
-  const [searching, setSearching] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
-
-  async function submit(e: FormEvent) {
-    e.preventDefault()
-    const q = query.trim()
-    if (!q) return
-    setSearching(true)
-    setMessage(null)
-    try {
-      const hit = await searchPlace(q)
-      if (hit) onPlace(hit)
-      else setMessage(`Couldn't find "${q}". Try a nearby area or city name.`)
-    } catch {
-      setMessage("Search isn't working right now. Check your connection and try again.")
-    } finally {
-      setSearching(false)
-    }
-  }
-
-  return (
-    <div className="flex flex-col gap-1.5">
-      <form
-        role="search"
-        onSubmit={submit}
-        className="flex h-[52px] items-center gap-2.5 rounded-2xl bg-white px-4 shadow-[0_4px_16px_rgba(21,24,27,0.10)]"
-      >
-        <span className="text-muted">{searching ? <Spinner size={20} /> : <Icon name="search" size={20} stroke={2} />}</span>
-        <label htmlFor="area" className="sr-only">Search an area</label>
-        <input
-          id="area"
-          type="search"
-          enterKeyHint="search"
-          placeholder="Search an area"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="h-11 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-faint"
-        />
-        {place && (
-          <button
-            type="button"
-            onClick={() => {
-              onPlace(null)
-              setQuery('')
-            }}
-            aria-label="Clear search and show ATMs near me"
-            className="flex size-8 items-center justify-center rounded-full bg-soft text-ink"
-          >
-            <Icon name="xmark" size={16} />
-          </button>
-        )}
-      </form>
-      {message && <p className="rounded-xl bg-white px-3 py-2 text-[13px] text-down-ink shadow">{message}</p>}
     </div>
   )
 }

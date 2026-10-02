@@ -1,11 +1,14 @@
 @import 'tailwindcss';
 @import 'leaflet/dist/leaflet.css';
 
-/* Design tokens from DESIGN-HANDOFF.md. Light only for now. */
+/* Design tokens from DESIGN-HANDOFF.md (light). Dark values follow the phone's
+   setting, below. */
 @theme {
   --font-sans: 'Figtree', system-ui, sans-serif;
   --font-display: 'Bricolage Grotesque', 'Figtree', sans-serif;
 
+  --color-surface: #ffffff; /* cards, sheets, inputs */
+  --color-on-ink: #ffffff; /* text on ink-coloured chips/toasts */
   --color-ink: #15181b;
   --color-muted: #4b5259;
   --color-faint: #5a6168;
@@ -38,8 +41,42 @@
   --radius-sheet: 24px;
 }
 
+/* Dark theme: same roles, tuned for contrast on dark surfaces. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface: #1b1e21;
+    --color-on-ink: #111315;
+    --color-ink: #eceeeb;
+    --color-muted: #a9b0b6;
+    --color-faint: #959ca3;
+    --color-ground: #111315;
+    --color-line: #2e3337;
+    --color-hair: #262a2e;
+    --color-chip: #3a4045;
+    --color-soft: #24282c;
+    --color-disabled: #2a2e32;
+    --color-mapbg: #1e2226;
+
+    --color-primary: #5584f7;
+    --color-primary-dark: #3d68d8;
+    --color-info-soft: #1d2947;
+    --color-info-ink: #bccdff;
+
+    --color-ok: #2a9a62;
+    --color-ok-soft: #15302a;
+    --color-ok-ink: #8eddb3;
+    --color-down: #d0571f;
+    --color-down-soft: #3a2318;
+    --color-down-ink: #ffb08a;
+    --color-unknown: #a0a7ad;
+    --color-unknown-soft: #2a2e33;
+    --color-unknown-pin: #7a8087;
+    --color-unknown-ink: #c9ced3;
+  }
+}
+
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   -webkit-tap-highlight-color: transparent;
@@ -59,6 +96,8 @@
   button { cursor: pointer; }
   button:disabled { cursor: default; }
   :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+  /* We draw our own clear (×) button on search fields. */
+  input[type='search']::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
 }
 
 #device { position: fixed; inset: 0; overflow: hidden; background: var(--color-ground); isolation: isolate; }
@@ -72,6 +111,11 @@
     left: 50%; right: auto; width: 430px; transform: translateX(-50%);
     box-shadow: 0 0 40px rgba(21, 24, 27, 0.12);
   }
+}
+@media (min-width: 700px) and (prefers-color-scheme: dark) {
+  html { background: #0b0c0d; }
+  body { background: radial-gradient(circle at 50% 30%, #23272b, #0b0c0d); }
+  #device { box-shadow: 0 0 0 0.5px #2e3337; }
 }
 /* Tall enough for a whole phone: show it in a phone frame. */
 @media (min-width: 700px) and (min-height: 720px) {
@@ -92,16 +136,27 @@
 @keyframes page-fade { from { opacity: 0; } }
 
 /* Scroll areas that should feel native on phones. */
-.scroll-y { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.scroll-y { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.scroll-y::-webkit-scrollbar { display: none; }
 
-/* Leaflet: tone the standard OSM map down to the design's quiet, light look;
-   keep the required attribution small but readable. */
+/* Leaflet: keep the required attribution small but readable. */
 .leaflet-container { background: var(--color-mapbg); font-family: var(--font-sans); }
-.leaflet-tile-pane { filter: saturate(0.3) brightness(1.06) contrast(0.88); }
-.leaflet-control-attribution { font-size: 10px; background: rgba(255, 255, 255, 0.8) !important; }
+.leaflet-container a { color: var(--color-primary); }
+/* Only for the OpenStreetMap fallback: tone it down to the design's quiet look
+   (and turn it dark in dark mode, since OSM has no dark style). */
+.tiles-osm { filter: saturate(0.3) brightness(1.06) contrast(0.88); }
+@media (prefers-color-scheme: dark) {
+  .tiles-osm { filter: invert(1) hue-rotate(180deg) saturate(0.3) brightness(0.9) contrast(0.85); }
+}
+.leaflet-control-attribution { font-size: 10px; background: color-mix(in srgb, var(--color-surface) 80%, transparent) !important; color: var(--color-muted); max-width: calc(100vw - 100px); white-space: normal; text-align: right; }
 .leaflet-div-icon { background: none; border: 0; }
+.map-logo { display: block; margin: 0 0 4px 8px !important; line-height: 0; }
+.map-logo img { height: 18px; width: auto; }
 /* On the main map, keep the credit visible just above the bottom sheet. */
 .map-screen .leaflet-bottom { bottom: var(--sheet-h, 0px); transition: bottom 0.3s ease-out; }
+/* List pulled up over the map: the map isn't visible, so its credit hides too
+   (otherwise it would sit on top of the filter chips). */
+.map-screen.sheet-open .leaflet-bottom { visibility: hidden; }
 
 /* Status pins: a teardrop (rounded square turned 45°) with a white ring. */
 .pin {

@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#F6F7F4" />
-    <meta name="color-scheme" content="light only" />
+    <meta name="theme-color" content="#F6F7F4" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111315" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -39,6 +40,10 @@
         animation: splash-rise .35s .15s cubic-bezier(.32, .72, 0, 1) both;
       }
       #splash.out { animation: splash-out .25s ease-in forwards; }
+      @media (prefers-color-scheme: dark) {
+        #splash { background: #111315; }
+        #splash .name { color: #ECEEEB; }
+      }
       @keyframes splash-pop { from { transform: scale(.5); opacity: 0; } }
       @keyframes splash-dot { from { transform: scale(0); } }
       @keyframes splash-ping { from { transform: scale(1); opacity: .6; } to { transform: scale(2.4); opacity: 0; } }

@@ -20,7 +20,7 @@ export function ThanksScreen() {
   const who = atm ? `${atmName(atm.bank)}${place ? ` on ${place}` : ''}` : 'This ATM'
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-white px-5 pt-[calc(var(--safe-top)+12px)] pb-[calc(var(--safe-bottom)+32px)]">
+    <div className="absolute inset-0 flex flex-col bg-surface px-5 pt-[calc(var(--safe-top)+12px)] pb-[calc(var(--safe-bottom)+32px)]">
       <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
         <span className="flex size-28 items-center justify-center rounded-full bg-ok-soft" aria-hidden="true">
           <span className="flex size-[76px] items-center justify-center rounded-full bg-ok text-white">

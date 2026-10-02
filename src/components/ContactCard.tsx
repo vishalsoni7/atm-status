@@ -56,7 +56,7 @@ export function ContactCard({ source }: { source: ContactSource }) {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           disabled={sending}
-          className="h-12 min-w-0 flex-1 rounded-[14px] border-[1.5px] border-chip bg-white px-3.5 text-base outline-none placeholder:text-faint focus:border-primary"
+          className="h-12 min-w-0 flex-1 rounded-[14px] border-[1.5px] border-chip bg-surface px-3.5 text-base outline-none placeholder:text-faint focus:border-primary"
         />
         <button type="submit" disabled={sending} className="flex h-12 min-w-[76px] items-center justify-center rounded-[14px] bg-primary px-4 font-bold text-white disabled:opacity-60">
           {sending ? <Spinner size={18} /> : 'Save'}

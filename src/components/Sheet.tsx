@@ -55,7 +55,7 @@ export function Sheet({ open, title, onClose, children }: Props) {
   return (
     <div className="absolute inset-0 z-[1000]">
       <div
-        className={`absolute inset-0 bg-ink/40 ${open ? 'anim-fade-in' : 'anim-fade-out'}`}
+        className={`absolute inset-0 bg-black/50 ${open ? 'anim-fade-in' : 'anim-fade-out'}`}
         onClick={onClose}
         style={drag ? { opacity: Math.max(0.2, 1 - drag / 400) } : undefined}
       />
@@ -63,7 +63,7 @@ export function Sheet({ open, title, onClose, children }: Props) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`scroll-y absolute inset-x-0 bottom-0 max-h-[92%] rounded-t-[24px] bg-white px-5 pb-[calc(var(--safe-bottom)+20px)] shadow-[0_-6px_24px_rgba(21,24,27,0.10)] ${open ? 'anim-sheet-up' : 'anim-sheet-down'}`}
+        className={`scroll-y absolute inset-x-0 bottom-0 max-h-[92%] rounded-t-[24px] bg-surface px-5 pb-[calc(var(--safe-bottom)+20px)] shadow-[0_-6px_24px_rgba(21,24,27,0.10)] ${open ? 'anim-sheet-up' : 'anim-sheet-down'}`}
         style={drag ? { transform: `translateY(${drag}px)`, transition: dragging ? 'none' : 'transform .3s' } : undefined}
       >
         <div className="cursor-grab touch-none pt-2.5" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
@@ -86,7 +86,7 @@ export function Toast({ text }: { text: string }) {
   return (
     <div
       role="status"
-      className="anim-toast absolute bottom-[calc(var(--safe-bottom)+24px)] left-1/2 z-[1100] flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-ink px-4 py-3 text-[15px] font-semibold text-white shadow-lg"
+      className="anim-toast absolute bottom-[calc(var(--safe-bottom)+24px)] left-1/2 z-[1100] flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-ink px-4 py-3 text-[15px] font-semibold text-on-ink shadow-lg"
     >
       <span className="flex size-5 items-center justify-center rounded-full bg-ok"><Icon name="check" size={13} stroke={3.2} /></span>
       {text}

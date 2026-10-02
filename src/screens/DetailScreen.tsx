@@ -63,7 +63,7 @@ export function DetailScreen() {
       type="button"
       onClick={() => goBack('/')}
       aria-label="Back to map"
-      className="absolute top-[calc(var(--safe-top)+12px)] left-4 z-[500] flex size-11 items-center justify-center rounded-[14px] bg-white text-ink shadow-[0_4px_12px_rgba(21,24,27,0.14)]"
+      className="absolute top-[calc(var(--safe-top)+12px)] left-4 z-[500] flex size-11 items-center justify-center rounded-[14px] bg-surface text-ink shadow-[0_4px_12px_rgba(21,24,27,0.14)]"
     >
       <Icon name="chevronLeft" size={22} />
     </button>
@@ -100,7 +100,7 @@ export function DetailScreen() {
       </div>
       {back}
 
-      <div className="relative z-[400] -mt-5 flex min-h-[calc(100%-200px)] flex-col gap-5 rounded-t-[24px] bg-white px-5 pt-6 pb-[calc(var(--safe-bottom)+28px)]">
+      <div className="relative z-[400] -mt-5 flex min-h-[calc(100%-200px)] flex-col gap-5 rounded-t-[24px] bg-surface px-5 pt-6 pb-[calc(var(--safe-bottom)+28px)]">
         <div className="flex flex-col gap-1.5">
           <h1 className="font-display text-[30px] leading-tight font-bold tracking-[-0.015em]">{atmName(atm.bank)}</h1>
           <p className="text-[15px] text-muted">{place || 'Address not added yet'}</p>
@@ -120,7 +120,7 @@ export function DetailScreen() {
             href={directionsUrl(atm.lat, atm.lng)}
             target="_blank"
             rel="noreferrer"
-            className="flex h-[52px] flex-1 basis-0 items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-chip bg-white text-base font-bold text-ink"
+            className="flex h-[52px] flex-1 basis-0 items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-chip bg-surface text-base font-bold text-ink"
           >
             <Icon name="navigate" size={18} /> Directions
           </a>
@@ -260,7 +260,7 @@ function ConfirmCard({ atmId, onConfirmed }: { atmId: string; onConfirmed: () =>
   }
 
   return (
-    <section className="flex flex-col gap-3 rounded-[18px] border-[1.5px] border-down/40 bg-white p-4">
+    <section className="flex flex-col gap-3 rounded-[18px] border-[1.5px] border-down/40 bg-surface p-4">
       <div>
         <h2 className="text-base font-bold text-down-ink">Not confirmed yet</h2>
         <p className="text-sm text-muted">A visitor added this ATM. If you can see it here, confirm it so others can trust it.</p>
@@ -309,7 +309,7 @@ function NameBankForm({ atmId, onSaved }: { atmId: string; onSaved: () => void }
         type="button"
         onClick={save}
         disabled={sending || bank.length < 2}
-        className="sticky bottom-0 flex h-14 items-center justify-center rounded-2xl bg-primary text-[17px] font-bold text-white shadow-[0_-16px_0_8px_white,0_12px_0_8px_white] disabled:bg-disabled disabled:text-faint"
+        className="sticky bottom-0 flex h-14 items-center justify-center rounded-2xl bg-primary text-[17px] font-bold text-white shadow-[0_-16px_0_8px_var(--color-surface),0_12px_0_8px_var(--color-surface)] disabled:bg-disabled disabled:text-faint"
       >
         {sending ? <Spinner size={20} /> : bank.length < 2 ? 'Choose a bank' : 'Save bank'}
       </button>

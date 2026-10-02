@@ -12,7 +12,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'maptiler-logo.svg', 'maptiler-logo-dark.svg'],
       manifest: {
         name: 'ATM Status',
         short_name: 'ATM Status',
@@ -44,8 +44,9 @@ export default defineConfig({
             options: { cacheName: 'fonts', expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 } },
           },
           {
-            // Map tiles already viewed stay available offline (a week, as OSM's policy expects).
-            urlPattern: ({ url }) => url.host === 'tile.openstreetmap.org',
+            // Map tiles already viewed stay available offline for a week.
+            urlPattern: ({ url }) =>
+              url.host === 'tile.openstreetmap.org' || (url.host === 'api.maptiler.com' && url.pathname.startsWith('/maps/')),
             handler: 'CacheFirst',
             options: { cacheName: 'tiles', expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 7 } },
           },

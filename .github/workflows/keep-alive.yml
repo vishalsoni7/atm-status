@@ -1,0 +1,20 @@
+# Supabase's free plan pauses a project after 7 days without requests, which
+# would make the app's ATM list fail. This makes one small read every 3 days.
+# The key below is the public "publishable" key the app already ships with.
+name: Keep database awake
+
+on:
+  schedule:
+    - cron: '0 6 */3 * *' # 06:00 UTC every 3 days
+  workflow_dispatch: # "Run workflow" button in GitHub → Actions
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read nearby ATMs (Bhilwara)
+        run: |
+          curl --fail --silent --show-error --max-time 30 \
+            "https://envairdhriesraxbytbi.supabase.co/rest/v1/rpc/nearby_atms?user_lat=25.3463&user_lng=74.6364&radius_m=5000&max_results=1" \
+            -H "apikey: sb_publishable_iP4-mXC3LX8djWSMYMtxtA_yBb6mPWv" -o /dev/null
+          echo "Database is awake."

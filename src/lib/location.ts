@@ -18,30 +18,46 @@ export type LocationState =
   | { status: 'denied' } // the person (or browser) said no
   | { status: 'unavailable' } // no GPS fix, timeout, or no geolocation support
 
-export function usePosition(): { location: LocationState; retry: () => void } {
+export function usePosition(): { location: LocationState; retry: () => void; refreshing: boolean } {
   const [location, setLocation] = useState<LocationState>(() =>
     navigator.geolocation ? { status: 'locating' } : { status: 'unavailable' },
   )
   const [attempt, setAttempt] = useState(0)
+  // A fresh fix was asked for and hasn't arrived yet.
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     if (!navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(
-      (p) =>
+      (p) => {
+        setRefreshing(false)
         setLocation({
           status: 'found',
           pos: { lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy },
-        }),
-      (err) => setLocation({ status: err.code === err.PERMISSION_DENIED ? 'denied' : 'unavailable' }),
-      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 30_000 },
+        })
+      },
+      (err) => {
+        setRefreshing(false)
+        // A failed refresh keeps the position we already have.
+        setLocation((prev) =>
+          prev.status === 'found' && attempt > 0 ? prev : { status: err.code === err.PERMISSION_DENIED ? 'denied' : 'unavailable' },
+        )
+      },
+      // First look: quick, and a fix from the last 30 s is fine.
+      // "Check again" / "show my location": a fresh, precise fix (they may have moved).
+      attempt === 0
+        ? { enableHighAccuracy: false, timeout: 10_000, maximumAge: 30_000 }
+        : { enableHighAccuracy: true, timeout: 15_000, maximumAge: 0 },
     )
   }, [attempt])
 
+  // Keeps showing the current position while the fresh one arrives.
   const retry = () => {
-    setLocation({ status: 'locating' })
+    setRefreshing(true)
+    setLocation((prev) => (prev.status === 'found' ? prev : { status: 'locating' }))
     setAttempt((n) => n + 1)
   }
-  return { location, retry }
+  return { location, retry, refreshing }
 }
 
 // A fresh, as-precise-as-possible fix, for pinning a new ATM where the person stands.

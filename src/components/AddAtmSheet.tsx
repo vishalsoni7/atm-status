@@ -124,7 +124,7 @@ export function AddAtmForm({ onAdded }: { onAdded: () => void }) {
       <button
         type="submit"
         disabled={sending || fix.status !== 'found' || bank.length < 2}
-        className="sticky bottom-0 flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-[17px] font-bold text-white shadow-[0_-16px_0_8px_white,0_12px_0_8px_white] disabled:bg-disabled disabled:text-faint"
+        className="sticky bottom-0 flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-[17px] font-bold text-white shadow-[0_-16px_0_8px_var(--color-surface),0_12px_0_8px_var(--color-surface)] disabled:bg-disabled disabled:text-faint"
       >
         {sending ? <Spinner size={20} /> : bank.length < 2 ? 'Choose a bank' : <><Icon name="plus" size={20} stroke={2.6} /> Add ATM</>}
       </button>
