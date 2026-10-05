@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 const YEAR = new Date().getFullYear()
 
 // About block at the end of the list: who made it, what it is, required credit.
@@ -32,6 +34,10 @@ export function AppFooter() {
         >
           OpenStreetMap
         </a>
+        <span aria-hidden="true" className="mx-1.5">·</span>
+        <Link to="/privacy" className="text-faint underline decoration-chip underline-offset-2">
+          Privacy
+        </Link>
       </p>
     </footer>
   )

@@ -3,11 +3,26 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import pkg from './package.json' with { type: 'json' }
+import { readFileSync } from 'node:fs'
+
+// Don't ship the privacy page with its placeholder contact email.
+function requirePrivacyEmail() {
+  return {
+    name: 'require-privacy-email',
+    apply: 'build' as const,
+    buildStart() {
+      if (readFileSync('src/lib/about.ts', 'utf8').includes('YOUR-CONTACT-EMAIL')) {
+        throw new Error('Set PRIVACY_EMAIL in src/lib/about.ts before building for production.')
+      }
+    },
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   plugins: [
+    requirePrivacyEmail(),
     react(),
     tailwindcss(),
     VitePWA({

@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { InvalidContactError, saveContact, type ContactSource } from '../lib/api'
 import { markContactSaved, useContactSaved } from '../lib/contact'
 import { Icon, Spinner } from './Icon'
@@ -63,7 +64,12 @@ export function ContactCard({ source }: { source: ContactSource }) {
         </button>
       </form>
       {error && <p className="text-[13px] text-down-ink">{error}</p>}
-      <p className="text-xs text-muted">We may contact you about ATM Status.</p>
+      <p className="text-xs text-muted">
+        We may contact you about ATM Status.{' '}
+        <Link to="/privacy" className="underline underline-offset-2">
+          Privacy
+        </Link>
+      </p>
     </section>
   )
 }

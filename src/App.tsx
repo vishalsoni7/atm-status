@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { DetailScreen } from './screens/DetailScreen'
 import { MapScreen } from './screens/MapScreen'
+import { PrivacyScreen } from './screens/PrivacyScreen'
 import { ReportScreen } from './screens/ReportScreen'
 import { ThanksScreen } from './screens/ThanksScreen'
 
@@ -22,6 +23,7 @@ function Pages() {
         <Route path="/atm/:id" element={<DetailScreen />} />
         <Route path="/atm/:id/report" element={<ReportScreen />} />
         <Route path="/atm/:id/thanks" element={<ThanksScreen />} />
+        <Route path="/privacy" element={<PrivacyScreen />} />
         <Route path="*" element={<MapScreen />} />
       </Routes>
     </div>
