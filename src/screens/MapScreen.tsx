@@ -13,7 +13,7 @@ import { fetchNearby } from '../lib/api'
 import { atmName } from '../lib/banks'
 import type { Place } from '../lib/geocode'
 import { atmsHere } from '../lib/here'
-import { INDIA_VIEW, SEARCH_RADIUS_M, formatDistance, usePosition } from '../lib/location'
+import { INDIA_VIEW, SEARCH_RADIUS_M, distanceM, formatDistance, usePosition } from '../lib/location'
 import { currentTone, whenLabel, type Tone } from '../lib/status'
 import { useToast } from '../lib/toast'
 import type { NearbyAtm } from '../lib/types'
@@ -27,17 +27,23 @@ const FILTERS: { id: Filter; label: string }[] = [
 
 // Bottom sheet: resting height from the design, and how close to the top it opens.
 const SHEET_PEEK = 404
+// Reload the list after walking this far from where it was loaded.
+const RELOAD_AFTER_M = 200
 const SHEET_TOP_GAP = 120
 
 export function MapScreen() {
   const navigate = useNavigate()
-  const { location, retry } = usePosition()
+  const { location, retry } = usePosition({ follow: true })
   const me = location.status === 'found' ? location.pos : null
   const [params, setParams] = useSearchParams()
   const filter = (['ok', 'down'].includes(params.get('filter') ?? '') ? params.get('filter') : 'all') as Filter
 
   const [place, setPlace] = useState<Place | null>(null)
-  const center = place ?? me
+  // Where the list was last loaded around. Follows the person, but only after a
+  // real walk, so GPS jitter doesn't reload the list (or move the map) constantly.
+  const [anchor, setAnchor] = useState<{ lat: number; lng: number } | null>(null)
+  if (me && (!anchor || distanceM(anchor, me) > RELOAD_AFTER_M)) setAnchor({ lat: me.lat, lng: me.lng })
+  const center = place ?? anchor
   const [atms, setAtms] = useState<NearbyAtm[] | null>(null)
   const [error, setError] = useState(false)
   const [adding, setAdding] = useState(false)
@@ -99,15 +105,23 @@ export function MapScreen() {
     setExpanded(moved ? h > (peek + full) / 2 : !expanded)
   }
 
-  const withTone = useMemo(
-    () => (atms ?? []).map((a) => ({ ...a, tone: currentTone(a.last_status, a.last_reported_at, a.lifecycle) as Tone })),
-    [atms],
-  )
+  // Distances from where the person is right now (not where the list was loaded).
+  const withTone = useMemo(() => {
+    const list = (atms ?? []).map((a) => ({
+      ...a,
+      distance_m: me && !place ? distanceM(me, a) : a.distance_m,
+      tone: currentTone(a.last_status, a.last_reported_at, a.lifecycle) as Tone,
+    }))
+    return me && !place ? list.sort((x, y) => x.distance_m - y.distance_m) : list
+  }, [atms, me, place])
   const shown = filter === 'all' ? withTone : withTone.filter((a) => a.tone === filter)
   const here = place ? [] : atmsHere(me, atms)
 
-  const view = center ? { center, zoom: 15 } : INDIA_VIEW
-  const viewKey = `${center?.lat},${center?.lng},${recenter}`
+  // The map moves only when asked: first location, a searched place, or the
+  // "show my location" button. Walking around just moves the blue dot.
+  const viewCenter = place ?? me ?? anchor
+  const view = viewCenter ? { center: viewCenter, zoom: 15 } : INDIA_VIEW
+  const viewKey = place ? `place:${place.lat},${place.lng}` : `me:${anchor ? 'found' : 'none'}:${recenter}`
 
   // Back to "near me", with a fresh fix in case they've moved.
   function showMine() {

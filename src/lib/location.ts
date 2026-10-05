@@ -18,7 +18,17 @@ export type LocationState =
   | { status: 'denied' } // the person (or browser) said no
   | { status: 'unavailable' } // no GPS fix, timeout, or no geolocation support
 
-export function usePosition(): { location: LocationState; retry: () => void; refreshing: boolean } {
+// Ignore GPS jitter smaller than this when following the person.
+const MOVE_THRESHOLD_M = 10
+
+// Where the person is. With `follow`, keeps updating while the screen is open
+// (precise GPS, like a maps app's blue dot), so walking up to an ATM is noticed
+// without reopening the app.
+export function usePosition({ follow = false }: { follow?: boolean } = {}): {
+  location: LocationState
+  retry: () => void
+  refreshing: boolean
+} {
   const [location, setLocation] = useState<LocationState>(() =>
     navigator.geolocation ? { status: 'locating' } : { status: 'unavailable' },
   )
@@ -28,28 +38,59 @@ export function usePosition(): { location: LocationState; retry: () => void; ref
 
   useEffect(() => {
     if (!navigator.geolocation) return
-    navigator.geolocation.getCurrentPosition(
-      (p) => {
-        setRefreshing(false)
-        setLocation({
-          status: 'found',
-          pos: { lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy },
-        })
-      },
-      (err) => {
-        setRefreshing(false)
-        // A failed refresh keeps the position we already have.
-        setLocation((prev) =>
-          prev.status === 'found' && attempt > 0 ? prev : { status: err.code === err.PERMISSION_DENIED ? 'denied' : 'unavailable' },
-        )
-      },
-      // First look: quick, and a fix from the last 30 s is fine.
-      // "Check again" / "show my location": a fresh, precise fix (they may have moved).
+    const geo = navigator.geolocation
+    let watchId: number | null = null
+
+    const found = (p: GeolocationPosition) => {
+      setRefreshing(false)
+      const next = { lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy }
+      // Skip tiny jitter so the screen doesn't redraw constantly.
+      setLocation((prev) =>
+        prev.status === 'found' &&
+        distanceM(prev.pos, next) < MOVE_THRESHOLD_M &&
+        Math.abs(prev.pos.accuracy - next.accuracy) < MOVE_THRESHOLD_M
+          ? prev
+          : { status: 'found', pos: next },
+      )
+    }
+    const failed = (err: GeolocationPositionError) => {
+      setRefreshing(false)
+      // A failed refresh keeps the position we already have.
+      setLocation((prev) =>
+        prev.status === 'found' ? prev : { status: err.code === err.PERMISSION_DENIED ? 'denied' : 'unavailable' },
+      )
+    }
+
+    // First look: quick, and a fix from the last 30 s is fine.
+    // "Check again" / "show my location": a fresh, precise fix (they may have moved).
+    geo.getCurrentPosition(
+      found,
+      failed,
       attempt === 0
         ? { enableHighAccuracy: false, timeout: 10_000, maximumAge: 30_000 }
         : { enableHighAccuracy: true, timeout: 15_000, maximumAge: 0 },
     )
-  }, [attempt])
+    if (follow) {
+      watchId = geo.watchPosition(found, (err) => err.code === err.PERMISSION_DENIED && failed(err), {
+        enableHighAccuracy: true,
+        maximumAge: 5_000,
+        timeout: 30_000,
+      })
+    }
+
+    // Coming back to the app (phones pause location in the background): refresh.
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        geo.getCurrentPosition(found, () => {}, { enableHighAccuracy: true, timeout: 15_000, maximumAge: 0 })
+      }
+    }
+    if (follow) document.addEventListener('visibilitychange', onVisible)
+
+    return () => {
+      if (watchId !== null) geo.clearWatch(watchId)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [attempt, follow])
 
   // Keeps showing the current position while the fresh one arrives.
   const retry = () => {

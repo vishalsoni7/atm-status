@@ -15,7 +15,8 @@ export function ReportScreen() {
   const { id = '' } = useParams()
   const [params] = useSearchParams()
   const goBack = useBack()
-  const { location, retry, refreshing } = usePosition()
+  // Follows the person, so the form unlocks by itself when they reach the ATM.
+  const { location, retry, refreshing } = usePosition({ follow: true })
   const [atm, setAtm] = useState<Atm | null | undefined>(undefined)
 
   useEffect(() => {
