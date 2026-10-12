@@ -23,7 +23,15 @@ export function AppFooter() {
       <p className="self-center rounded-full bg-ground px-4 py-2 text-[13px] font-semibold text-ink">Be kind to animals  🐾♥️</p>
 
       <p className="text-center text-xs leading-relaxed text-faint">
-        © {YEAR} Vishal Soni
+        © {YEAR}{' '}
+        <a
+          href="https://vishalsoni.netlify.app/projects/atm-status/"
+          target="_blank"
+          rel="noreferrer"
+          className="text-faint underline decoration-chip underline-offset-2"
+        >
+          Vishal Soni
+        </a>
         <span aria-hidden="true" className="mx-1.5">·</span>
         Map data ©{' '}
         <a
