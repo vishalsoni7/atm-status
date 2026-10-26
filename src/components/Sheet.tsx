@@ -63,14 +63,14 @@ export function Sheet({ open, title, onClose, children }: Props) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`scroll-y absolute inset-x-0 bottom-0 max-h-[92%] rounded-t-[24px] bg-surface px-5 pb-[calc(var(--safe-bottom)+20px)] shadow-[0_-6px_24px_rgba(21,24,27,0.10)] ${open ? 'anim-sheet-up' : 'anim-sheet-down'}`}
+        className={`scroll-y absolute inset-x-0 bottom-0 max-h-[92%] rounded-t-sheet bg-surface px-5 pb-[calc(var(--safe-bottom)+20px)] shadow-sheet ${open ? 'anim-sheet-up' : 'anim-sheet-down'}`}
         style={drag ? { transform: `translateY(${drag}px)`, transition: dragging ? 'none' : 'transform .3s' } : undefined}
       >
         <div className="cursor-grab touch-none pt-2.5" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
           <div className="mx-auto h-[5px] w-10 rounded-full bg-chip" aria-hidden="true" />
           <div className="flex items-center justify-between gap-3 pt-4 pb-3">
             <h2 className="font-display text-2xl font-bold tracking-[-0.01em]">{title}</h2>
-            <button onClick={onClose} aria-label="Close" className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-soft text-ink">
+            <button onClick={onClose} aria-label="Close" className="flex size-11 shrink-0 items-center justify-center rounded-btn bg-soft text-ink">
               <Icon name="xmark" size={20} />
             </button>
           </div>

@@ -36,7 +36,7 @@ export function ThanksScreen() {
         <button
           type="button"
           onClick={() => navigate('/?filter=ok', { replace: true })}
-          className="h-14 rounded-2xl bg-primary text-[17px] font-bold text-white active:bg-primary-dark"
+          className="h-14 rounded-cta bg-primary-solid text-[17px] font-bold text-white active:bg-primary-dark"
         >
           Find a working ATM
         </button>

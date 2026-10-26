@@ -59,14 +59,14 @@ export function AtAtmPrompt({ atms, onReported }: { atms: NearbyAtm[]; onReporte
   }
 
   const close = (
-    <button onClick={dismiss} aria-label="Not now" className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-surface/70 text-ink">
+    <button onClick={dismiss} aria-label="Not now" className="flex size-9 shrink-0 items-center justify-center rounded-tile bg-surface/70 text-ink">
       <Icon name="xmark" size={16} />
     </button>
   )
 
   if (!atm) {
     return (
-      <section className="flex flex-col gap-3 rounded-[18px] bg-info-soft p-4" aria-label="Which ATM are you at?">
+      <section className="flex flex-col gap-3 rounded-card bg-info-soft p-4" aria-label="Which ATM are you at?">
         <div className="flex items-start gap-3">
           <div className="flex-1">
             <h2 className="text-lg font-bold text-info-ink">You're at an ATM</h2>
@@ -75,7 +75,7 @@ export function AtAtmPrompt({ atms, onReported }: { atms: NearbyAtm[]; onReporte
           {close}
         </div>
         {atms.map((a) => (
-          <button key={a.id} onClick={() => setChosenId(a.id)} className="flex items-center gap-3 rounded-[14px] bg-surface p-2.5 text-left font-semibold">
+          <button key={a.id} onClick={() => setChosenId(a.id)} className="flex items-center gap-3 rounded-btn bg-surface p-2.5 text-left font-semibold">
             <BankBadge bank={a.bank} size={32} />
             <span className="flex-1">{atmName(a.bank)}</span>
             <Icon name="chevronRight" size={18} />
@@ -86,7 +86,7 @@ export function AtAtmPrompt({ atms, onReported }: { atms: NearbyAtm[]; onReporte
   }
 
   return (
-    <section className="flex flex-col gap-3 rounded-[18px] bg-info-soft p-4" aria-label={`You're at ${atmName(atm.bank)}`}>
+    <section className="flex flex-col gap-3 rounded-card bg-info-soft p-4" aria-label={`You're at ${atmName(atm.bank)}`}>
       <div className="flex items-start gap-3">
         <div className="flex-1">
           <h2 className="text-lg font-bold text-info-ink">You're at {atmName(atm.bank)}</h2>
@@ -99,14 +99,14 @@ export function AtAtmPrompt({ atms, onReported }: { atms: NearbyAtm[]; onReporte
           <button
             onClick={() => working(atm)}
             disabled={sending}
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[14px] bg-ok font-bold text-white disabled:opacity-70"
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-btn bg-ok font-bold text-white disabled:opacity-70"
           >
             {sending ? <Spinner size={18} /> : <Icon name="check" size={18} stroke={3} />} Working
           </button>
           <button
             onClick={() => navigate(`/atm/${atm.id}/report?answer=no`)}
             disabled={sending}
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[14px] bg-down font-bold text-white"
+            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-btn bg-down font-bold text-white"
           >
             <Icon name="xmark" size={18} stroke={3} /> Not working
           </button>

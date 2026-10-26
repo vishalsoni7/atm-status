@@ -7,7 +7,7 @@ export function AppFooter() {
   return (
     <footer className="mt-2 flex flex-col gap-4 border-t border-hair pt-5 pb-3">
       <div className="flex items-center gap-3">
-        <img src="/favicon.svg" alt="" width="40" height="40" className="rounded-[11px] shadow-[0_2px_8px_rgba(28,79,209,0.25)]" />
+        <img src="/favicon.svg" alt="" width="40" height="40" className="rounded-[11px] shadow-icon" />
         <div className="flex min-w-0 flex-1 flex-col">
           <strong className="font-display text-[17px] leading-tight font-bold tracking-[-0.01em] text-ink">ATM Status</strong>
           <span className="text-[13px] text-muted">Know before you go</span>

@@ -141,7 +141,7 @@ export function SearchBar({ place, near, atms, listMaxHeight, onPlace, onAtm }: 
       <form
         role="search"
         onSubmit={submit}
-        className="flex h-[52px] items-center gap-2.5 rounded-2xl bg-surface px-4 shadow-[0_4px_16px_rgba(21,24,27,0.10)]"
+        className="flex h-[52px] items-center gap-2.5 rounded-cta bg-surface px-4 shadow-search"
       >
         <span className="text-muted">{searching || suggesting ? <Spinner size={20} /> : <Icon name="search" size={20} stroke={2} />}</span>
         <label htmlFor="area" className="sr-only">Search an area or bank</label>
@@ -191,7 +191,7 @@ export function SearchBar({ place, near, atms, listMaxHeight, onPlace, onAtm }: 
           id={listId}
           role="listbox"
           aria-label="Suggestions"
-          className="scroll-y absolute inset-x-0 top-[58px] z-10 rounded-2xl bg-surface py-0.5 shadow-[0_8px_24px_rgba(21,24,27,0.16)]"
+          className="scroll-y absolute inset-x-0 top-[58px] z-10 rounded-cta bg-surface py-0.5 shadow-menu"
           style={{ maxHeight: listMaxHeight }}
         >
           {items.map((item, i) => (
@@ -233,7 +233,7 @@ export function SearchBar({ place, near, atms, listMaxHeight, onPlace, onAtm }: 
         </ul>
       )}
 
-      {message && <p className="rounded-xl bg-surface px-3 py-2 text-[13px] text-down-ink shadow">{message}</p>}
+      {message && <p className="rounded-tile bg-surface px-3 py-2 text-[13px] text-down-ink shadow">{message}</p>}
     </div>
   )
 }

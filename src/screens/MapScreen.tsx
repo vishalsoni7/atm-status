@@ -168,7 +168,7 @@ export function MapScreen() {
                 type="button"
                 aria-pressed={on}
                 onClick={() => setParams(f.id === 'all' ? {} : { filter: f.id }, { replace: true })}
-                className={`h-10 rounded-full border px-4 text-sm font-semibold shadow-[0_2px_8px_rgba(21,24,27,0.08)] ${on ? 'border-ink bg-ink text-on-ink' : 'border-line bg-surface text-ink'}`}
+                className={`h-10 rounded-full border px-4 text-sm font-semibold shadow-chip ${on ? 'border-ink bg-ink text-on-ink' : 'border-line bg-surface text-ink'}`}
               >
                 {f.label}
               </button>
@@ -182,7 +182,7 @@ export function MapScreen() {
         hidden={sheetH > peek + 80}
         onClick={showMine}
         aria-label="Show my location"
-        className="absolute right-4 z-[500] flex size-12 items-center justify-center rounded-[14px] bg-surface text-primary shadow-[0_4px_12px_rgba(21,24,27,0.14)] transition-[bottom] duration-300"
+        className="absolute right-4 z-[500] flex size-12 items-center justify-center rounded-btn bg-surface text-primary shadow-float transition-[bottom] duration-300"
         style={{ bottom: sheetH + 16 }}
       >
         <Icon name="crosshair" size={22} stroke={2} />
@@ -190,7 +190,7 @@ export function MapScreen() {
 
       <section
         aria-label="Nearby ATMs"
-        className={`absolute inset-x-0 bottom-0 z-[600] flex flex-col rounded-t-[24px] bg-surface px-5 shadow-[0_-6px_24px_rgba(21,24,27,0.10)] ${drag === null ? 'transition-[height] duration-300 ease-out' : ''}`}
+        className={`absolute inset-x-0 bottom-0 z-[600] flex flex-col rounded-t-sheet bg-surface px-5 shadow-sheet ${drag === null ? 'transition-[height] duration-300 ease-out' : ''}`}
         style={{ height: sheetH }}
       >
         <div
@@ -283,9 +283,9 @@ export function MapScreen() {
               <button
                 type="button"
                 onClick={() => setAdding(true)}
-                className="flex items-center gap-3 rounded-[18px] border-[1.5px] border-dashed border-chip p-4 text-left"
+                className="flex items-center gap-3 rounded-card border-[1.5px] border-dashed border-chip p-4 text-left"
               >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-info-soft text-primary">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-tile bg-info-soft text-primary">
                   <Icon name="plus" size={20} stroke={2.6} />
                 </span>
                 <span className="flex flex-col">
@@ -327,7 +327,7 @@ function Empty({ icon, title, text, action }: { icon: React.ReactNode; title: st
 
 function PrimarySmall({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
   return (
-    <button type="button" onClick={onClick} className="h-11 rounded-[14px] bg-primary px-5 font-bold text-white">
+    <button type="button" onClick={onClick} className="h-11 rounded-btn bg-primary-solid px-5 font-bold text-white">
       {children}
     </button>
   )

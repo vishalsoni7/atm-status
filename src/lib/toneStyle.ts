@@ -3,8 +3,8 @@ import type { Tone } from './status'
 // Colour classes per status. Every status also has an icon and a word,
 // so it never relies on colour alone.
 export const TONE_CLASS: Record<Tone, { solid: string; soft: string; ink: string; text: string }> = {
-  ok: { solid: 'bg-ok', soft: 'bg-ok-soft', ink: 'text-ok-ink', text: 'text-ok' },
-  down: { solid: 'bg-down', soft: 'bg-down-soft', ink: 'text-down-ink', text: 'text-down' },
+  ok: { solid: 'bg-ok', soft: 'bg-ok-soft', ink: 'text-ok-ink', text: 'text-ok-text' },
+  down: { solid: 'bg-down', soft: 'bg-down-soft', ink: 'text-down-ink', text: 'text-down-text' },
   unknown: { solid: 'bg-unknown-pin', soft: 'bg-unknown-soft', ink: 'text-unknown-ink', text: 'text-unknown' },
 }
 

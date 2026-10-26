@@ -68,7 +68,7 @@ export function AddAtmForm({ onAdded }: { onAdded: () => void }) {
     <form className="flex flex-col gap-5" onSubmit={submit}>
       <p className="-mt-1 text-[15px] text-muted">Stand at the ATM. We'll pin it at your current location.</p>
 
-      <div className={`flex flex-wrap items-center gap-2 rounded-[14px] px-3.5 py-3 text-sm font-semibold ${fixTone}`}>
+      <div className={`flex flex-wrap items-center gap-2 rounded-btn px-3.5 py-3 text-sm font-semibold ${fixTone}`}>
         {fix.status === 'locating' ? (
           <>
             <Spinner size={18} />
@@ -109,7 +109,7 @@ export function AddAtmForm({ onAdded }: { onAdded: () => void }) {
           maxLength={120}
           value={landmark}
           onChange={(e) => setLandmark(e.target.value)}
-          className="h-12 rounded-[14px] border-[1.5px] border-chip px-3.5 text-base outline-none placeholder:text-faint focus:border-primary"
+          className="h-12 rounded-btn border-[1.5px] border-field px-3.5 text-base outline-none placeholder:text-faint focus:border-primary"
         />
       </label>
 
@@ -124,7 +124,7 @@ export function AddAtmForm({ onAdded }: { onAdded: () => void }) {
       <button
         type="submit"
         disabled={sending || fix.status !== 'found' || bank.length < 2}
-        className="sticky bottom-0 flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-[17px] font-bold text-white shadow-[0_-16px_0_8px_var(--color-surface),0_12px_0_8px_var(--color-surface)] disabled:bg-disabled disabled:text-faint"
+        className="sticky bottom-0 flex h-14 items-center justify-center gap-2 rounded-cta bg-primary-solid text-[17px] font-bold text-white shadow-[0_-16px_0_8px_var(--color-surface),0_12px_0_8px_var(--color-surface)] disabled:bg-disabled disabled:text-faint"
       >
         {sending ? <Spinner size={20} /> : bank.length < 2 ? 'Choose a bank' : <><Icon name="plus" size={20} stroke={2.6} /> Add ATM</>}
       </button>

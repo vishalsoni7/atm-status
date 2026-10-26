@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 @import 'leaflet/dist/leaflet.css';
 
-/* Design tokens from DESIGN-HANDOFF.md (light). Dark values follow the phone's
-   setting, below. */
+/* Design tokens from the ATM Status design system (light). Dark values follow
+   the phone's setting, below. */
 @theme {
   --font-sans: 'Figtree', system-ui, sans-serif;
   --font-display: 'Bricolage Grotesque', 'Figtree', sans-serif;
@@ -16,29 +16,44 @@
   --color-line: #e2e5e0;
   --color-hair: #eceeea;
   --color-chip: #d5d9d4;
+  --color-field: #8a918c; /* input borders: 3:1 on surface */
   --color-soft: #f1f3ef;
   --color-disabled: #e6e9e4;
   --color-mapbg: #e6eae3;
 
   --color-primary: #1c4fd1;
   --color-primary-dark: #153da3;
+  --color-primary-solid: #1c4fd1; /* fill under white labels */
   --color-info-soft: #e8eefc;
   --color-info-ink: #122f80;
 
   --color-ok: #1b6e45;
   --color-ok-soft: #e3f2ea;
   --color-ok-ink: #145535;
+  --color-ok-text: #1b6e45; /* status word on ok-soft or surface */
   --color-down: #b4410e;
   --color-down-soft: #fcebdd;
   --color-down-ink: #8a330c;
+  --color-down-text: #b4410e;
   --color-unknown: #5a6168;
   --color-unknown-soft: #eceeef;
   --color-unknown-pin: #7a8087;
   --color-unknown-ink: #3f454b;
 
-  --radius-card: 18px;
+  --radius-tile: 12px;
   --radius-btn: 14px;
+  --radius-cta: 16px;
+  --radius-card: 18px;
   --radius-sheet: 24px;
+
+  /* Only things floating over the map cast shadows; tinted with ink. */
+  --shadow-chip: 0 2px 8px rgba(21, 24, 27, 0.08);
+  --shadow-float: 0 4px 12px rgba(21, 24, 27, 0.14);
+  --shadow-search: 0 4px 16px rgba(21, 24, 27, 0.10);
+  --shadow-menu: 0 8px 24px rgba(21, 24, 27, 0.16);
+  --shadow-sheet: 0 -6px 24px rgba(21, 24, 27, 0.10);
+  --shadow-pin: 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-icon: 0 2px 8px rgba(28, 79, 209, 0.25);
 }
 
 /* Dark theme: same roles, tuned for contrast on dark surfaces. */
@@ -53,21 +68,25 @@
     --color-line: #2e3337;
     --color-hair: #262a2e;
     --color-chip: #3a4045;
+    --color-field: #6b7278;
     --color-soft: #24282c;
     --color-disabled: #2a2e32;
     --color-mapbg: #1e2226;
 
     --color-primary: #5584f7;
-    --color-primary-dark: #3d68d8;
+    --color-primary-dark: #3358c0;
+    --color-primary-solid: #3d68d8; /* white on it 5.0:1 (primary itself is 3.5:1) */
     --color-info-soft: #1d2947;
     --color-info-ink: #bccdff;
 
-    --color-ok: #2a9a62;
+    --color-ok: #23824f; /* white on it 4.8:1 */
     --color-ok-soft: #15302a;
     --color-ok-ink: #8eddb3;
-    --color-down: #d0571f;
+    --color-ok-text: #3fbf7f; /* 6.0:1 on ok-soft */
+    --color-down: #c04e17; /* white on it 4.8:1 */
     --color-down-soft: #3a2318;
     --color-down-ink: #ffb08a;
+    --color-down-text: #f0743a; /* 5.1:1 on down-soft, 5.8:1 on surface */
     --color-unknown: #a0a7ad;
     --color-unknown-soft: #2a2e33;
     --color-unknown-pin: #7a8087;
@@ -163,7 +182,7 @@
   display: flex; align-items: center; justify-content: center;
   width: 100%; height: 100%; box-sizing: border-box;
   border-radius: 50% 50% 50% 4px; transform: rotate(-45deg);
-  border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  border: 3px solid #fff; box-shadow: var(--shadow-pin);
 }
 .pin > * { transform: rotate(45deg); }
 .pin-selected { outline: 3px solid rgba(28, 79, 209, 0.35); outline-offset: 2px; }

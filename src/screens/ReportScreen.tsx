@@ -51,7 +51,7 @@ export function ReportScreen() {
     <div className="scroll-y absolute inset-0 flex flex-col bg-surface px-5 pt-[calc(var(--safe-top)+12px)] pb-[calc(var(--safe-bottom)+32px)]">
       <div className="flex shrink-0 items-center justify-between gap-3">
         <p className="min-w-0 truncate text-sm font-semibold text-muted">{subtitle}</p>
-        <button onClick={close} aria-label="Close" className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-soft text-ink">
+        <button onClick={close} aria-label="Close" className="flex size-11 shrink-0 items-center justify-center rounded-btn bg-soft text-ink">
           <Icon name="xmark" size={20} />
         </button>
       </div>
@@ -124,7 +124,7 @@ function ReportForm({ atm, initial }: { atm: Atm; initial: Answer | null }) {
           type="button"
           onClick={submit}
           disabled={!answer || sending}
-          className="flex h-14 items-center justify-center rounded-2xl bg-primary text-[17px] font-bold text-white active:bg-primary-dark disabled:bg-disabled disabled:text-faint"
+          className="flex h-14 items-center justify-center rounded-cta bg-primary-solid text-[17px] font-bold text-white active:bg-primary-dark disabled:bg-disabled disabled:text-faint"
         >
           {sending ? <Spinner size={22} /> : answer ? 'Submit report' : 'Choose an answer'}
         </button>
@@ -154,7 +154,7 @@ function Choice({
       aria-pressed={disabled ? undefined : !!selected}
       onClick={onClick}
       disabled={disabled}
-      className={`flex min-h-[76px] items-center gap-4 rounded-[18px] border-2 px-[18px] text-left ${
+      className={`flex min-h-[76px] items-center gap-4 rounded-card border-2 px-[18px] text-left ${
         disabled ? 'border-line bg-soft text-faint' : selected ? on : 'border-line bg-surface'
       }`}
     >
@@ -171,8 +171,8 @@ function TooFar({ atm, distance, onRetry, checking }: { atm: Atm; distance: numb
     <div className="flex flex-1 flex-col gap-6 pt-6">
       <h1 className="font-display text-[32px] leading-[1.12] font-bold tracking-[-0.015em] text-balance">Is this ATM working right now?</h1>
 
-      <div className="flex items-start gap-3.5 rounded-[18px] bg-info-soft p-[18px]">
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-white" aria-hidden="true">
+      <div className="flex items-start gap-3.5 rounded-card bg-info-soft p-[18px]">
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-solid text-white" aria-hidden="true">
           <Icon name="pin" size={22} />
         </span>
         <div className="flex flex-col gap-1 text-info-ink">
@@ -193,7 +193,7 @@ function TooFar({ atm, distance, onRetry, checking }: { atm: Atm; distance: numb
           href={directionsUrl(atm.lat, atm.lng)}
           target="_blank"
           rel="noreferrer"
-          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-[17px] font-bold text-white"
+          className="flex h-14 items-center justify-center gap-2 rounded-cta bg-primary-solid text-[17px] font-bold text-white"
         >
           <Icon name="navigate" size={18} /> Get directions
         </a>
@@ -223,7 +223,7 @@ function NoLocation({ onRetry, onNotNow }: { onRetry: () => void; onNotNow: () =
         </p>
       </div>
       <div className="flex flex-col gap-2.5">
-        <button type="button" onClick={onRetry} className="h-14 rounded-2xl bg-primary text-[17px] font-bold text-white">
+        <button type="button" onClick={onRetry} className="h-14 rounded-cta bg-primary-solid text-[17px] font-bold text-white">
           Try again
         </button>
         <button type="button" onClick={onNotNow} className="h-12 text-base font-bold text-primary">

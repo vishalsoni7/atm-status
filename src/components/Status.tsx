@@ -30,7 +30,7 @@ export function BankTile({ bank, tone }: { bank: string; tone: Tone }) {
   const c = TONE_CLASS[tone]
   return (
     <span
-      className={`flex size-10 shrink-0 items-center justify-center rounded-xl font-bold ${c.soft} ${c.text} ${short.length > 4 ? 'text-[10px]' : 'text-xs'}`}
+      className={`flex size-10 shrink-0 items-center justify-center rounded-tile font-bold ${c.soft} ${c.text} ${short.length > 4 ? 'text-[10px]' : 'text-xs'}`}
       aria-hidden="true"
     >
       {short}

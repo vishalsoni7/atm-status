@@ -13,7 +13,7 @@ export function PrivacyScreen() {
           type="button"
           onClick={() => goBack('/')}
           aria-label="Back"
-          className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-soft text-ink"
+          className="flex size-11 shrink-0 items-center justify-center rounded-btn bg-soft text-ink"
         >
           <Icon name="chevronLeft" size={22} />
         </button>
@@ -95,7 +95,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function Item({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="rounded-[14px] bg-ground p-4">
+    <div className="rounded-btn bg-ground p-4">
       <h3 className="font-semibold">{label}</h3>
       <p className="mt-1 text-muted">{children}</p>
     </div>

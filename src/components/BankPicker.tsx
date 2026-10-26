@@ -13,7 +13,7 @@ export function BankPicker({ value, onChange }: { value: string; onChange: (bank
 
   return (
     <div className="flex flex-col gap-2.5">
-      <label className="flex h-11 items-center gap-2 rounded-[14px] border-[1.5px] border-chip px-3 text-muted focus-within:border-primary">
+      <label className="flex h-11 items-center gap-2 rounded-btn border-[1.5px] border-field px-3 text-muted focus-within:border-primary">
         <Icon name="search" size={18} />
         <input
           type="search"

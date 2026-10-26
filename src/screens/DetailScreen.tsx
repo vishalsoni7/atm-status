@@ -63,7 +63,7 @@ export function DetailScreen() {
       type="button"
       onClick={() => goBack('/')}
       aria-label="Back to map"
-      className="absolute top-[calc(var(--safe-top)+12px)] left-4 z-[500] flex size-11 items-center justify-center rounded-[14px] bg-surface text-ink shadow-[0_4px_12px_rgba(21,24,27,0.14)]"
+      className="absolute top-[calc(var(--safe-top)+12px)] left-4 z-[500] flex size-11 items-center justify-center rounded-btn bg-surface text-ink shadow-float"
     >
       <Icon name="chevronLeft" size={22} />
     </button>
@@ -100,7 +100,7 @@ export function DetailScreen() {
       </div>
       {back}
 
-      <div className="relative z-[400] -mt-5 flex min-h-[calc(100%-200px)] flex-col gap-5 rounded-t-[24px] bg-surface px-5 pt-6 pb-[calc(var(--safe-bottom)+28px)]">
+      <div className="relative z-[400] -mt-5 flex min-h-[calc(100%-200px)] flex-col gap-5 rounded-t-sheet bg-surface px-5 pt-6 pb-[calc(var(--safe-bottom)+28px)]">
         <div className="flex flex-col gap-1.5">
           <h1 className="font-display text-[30px] leading-tight font-bold tracking-[-0.015em]">{atmName(atm.bank)}</h1>
           <p className="text-[15px] text-muted">{place || 'Address not added yet'}</p>
@@ -120,13 +120,13 @@ export function DetailScreen() {
             href={directionsUrl(atm.lat, atm.lng)}
             target="_blank"
             rel="noreferrer"
-            className="flex h-[52px] flex-1 basis-0 items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-chip bg-surface text-base font-bold text-ink"
+            className="flex h-[52px] flex-1 basis-0 items-center justify-center gap-2 rounded-btn border-[1.5px] border-chip bg-surface text-base font-bold text-ink"
           >
             <Icon name="navigate" size={18} /> Directions
           </a>
           <Link
             to={`/atm/${atm.id}/report`}
-            className="flex h-[52px] flex-1 basis-0 items-center justify-center gap-2 rounded-[14px] bg-primary text-base font-bold text-white active:bg-primary-dark"
+            className="flex h-[52px] flex-1 basis-0 items-center justify-center gap-2 rounded-btn bg-primary-solid text-base font-bold text-white active:bg-primary-dark"
           >
             <Icon name="pencil" size={18} /> Report status
           </Link>
@@ -136,9 +136,9 @@ export function DetailScreen() {
           <button
             type="button"
             onClick={() => setNaming(true)}
-            className="flex items-center gap-3 rounded-[18px] bg-ground p-4 text-left"
+            className="flex items-center gap-3 rounded-card bg-ground p-4 text-left"
           >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-info-soft text-primary">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-tile bg-info-soft text-primary">
               <Icon name="question" size={20} stroke={2.6} />
             </span>
             <span className="flex flex-col">
@@ -166,7 +166,7 @@ export function DetailScreen() {
           <p className="mt-2 text-[13px] text-muted">Reports are anonymous. You can report each ATM once every 10 minutes.</p>
         </section>
 
-        <button type="button" onClick={() => setFlagging(true)} className="mx-auto py-2 text-[15px] font-semibold text-down">
+        <button type="button" onClick={() => setFlagging(true)} className="mx-auto py-2 text-[15px] font-semibold text-down-text">
           This ATM isn't here
         </button>
       </div>
@@ -218,7 +218,7 @@ function StatusCard({ atm, tone, latest, lastHour }: { atm: Atm; tone: Tone; lat
   }
 
   return (
-    <section className={`flex items-center gap-3.5 rounded-[18px] p-[18px] ${c.soft}`}>
+    <section className={`flex items-center gap-3.5 rounded-card p-[18px] ${c.soft}`}>
       <StatusIcon tone={tone} size={48} />
       <div className="flex flex-col gap-[3px]">
         <h2 className={`text-xl font-bold ${c.ink}`}>{title}</h2>
@@ -260,7 +260,7 @@ function ConfirmCard({ atmId, onConfirmed }: { atmId: string; onConfirmed: () =>
   }
 
   return (
-    <section className="flex flex-col gap-3 rounded-[18px] border-[1.5px] border-down/40 bg-surface p-4">
+    <section className="flex flex-col gap-3 rounded-card border-[1.5px] border-down/40 bg-surface p-4">
       <div>
         <h2 className="text-base font-bold text-down-ink">Not confirmed yet</h2>
         <p className="text-sm text-muted">A visitor added this ATM. If you can see it here, confirm it so others can trust it.</p>
@@ -269,7 +269,7 @@ function ConfirmCard({ atmId, onConfirmed }: { atmId: string; onConfirmed: () =>
         type="button"
         onClick={confirm}
         disabled={sending}
-        className="flex h-12 items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-chip font-bold text-ink"
+        className="flex h-12 items-center justify-center gap-2 rounded-btn border-[1.5px] border-chip font-bold text-ink"
       >
         {sending ? <Spinner size={18} /> : <><Icon name="check" size={18} stroke={2.6} /> Yes, it's here</>}
       </button>
@@ -309,7 +309,7 @@ function NameBankForm({ atmId, onSaved }: { atmId: string; onSaved: () => void }
         type="button"
         onClick={save}
         disabled={sending || bank.length < 2}
-        className="sticky bottom-0 flex h-14 items-center justify-center rounded-2xl bg-primary text-[17px] font-bold text-white shadow-[0_-16px_0_8px_var(--color-surface),0_12px_0_8px_var(--color-surface)] disabled:bg-disabled disabled:text-faint"
+        className="sticky bottom-0 flex h-14 items-center justify-center rounded-cta bg-primary-solid text-[17px] font-bold text-white shadow-[0_-16px_0_8px_var(--color-surface),0_12px_0_8px_var(--color-surface)] disabled:bg-disabled disabled:text-faint"
       >
         {sending ? <Spinner size={20} /> : bank.length < 2 ? 'Choose a bank' : 'Save bank'}
       </button>
@@ -343,7 +343,7 @@ function FlagMissingForm({ atmId, onDone, onCancel }: { atmId: string; onDone: (
         Use this if the ATM has been removed, or was never at this spot. When two people say it isn't here, we hide it.
       </p>
       {error && <p className="text-sm text-down-ink">{error}</p>}
-      <button type="button" onClick={flag} disabled={sending} className="flex h-14 items-center justify-center rounded-2xl bg-down text-[17px] font-bold text-white">
+      <button type="button" onClick={flag} disabled={sending} className="flex h-14 items-center justify-center rounded-cta bg-down text-[17px] font-bold text-white">
         {sending ? <Spinner size={20} /> : "It isn't here"}
       </button>
       <button type="button" onClick={onCancel} className="h-12 text-base font-bold text-primary">
